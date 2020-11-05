@@ -6,6 +6,7 @@
 #include "opencv4/opencv2/opencv.hpp"
 #include <iostream>
 #include <vector>
+#include "common.h"
 using namespace cv;
 using namespace std;
 
@@ -32,7 +33,8 @@ public:
     int maximum_allowed_skipped_frames;
     int max_trace_length;
     vector<CTrack*> tracks;
-    void Update(vector<Point2f>& detections);
+    void Update(std::vector<Person> &person);
+    void draw_person(cv::Mat &src);
     CTracker(float _dt,
              float _Accel_noise_mag,
              double _dist_thres=60,

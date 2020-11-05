@@ -7,6 +7,7 @@
 #include "detector.h"
 #include "tracker.h"
 #include "usart.h"
+#include "Ctracker.h"
 
 using namespace cv;
 
@@ -28,9 +29,9 @@ void CameraThread(Camera *cam, Ximg *img){
 }
 void ProcessThread(Ximg *img){
     XRDetector::Detector detector;
+    CTracker tracker(0.2, 0.5, 60.0, 10, 30);
     Ximg src;
     sleep(1);
-
     while(true){
         {
             lock_guard<mutex> lock(mut);
@@ -40,7 +41,10 @@ void ProcessThread(Ximg *img){
             //        mut.unlock();
         }
         detector.UpdatePerson(src, person);
-
+        if(person.size()>0){
+            tracker.Update(person);
+            tracker.draw_person(src.get_cv_color());
+        }
         DrawPred(src.get_cv_color(),person);
         imshow("src",src.get_cv_color());
         waitKey(1);

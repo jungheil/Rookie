@@ -75,7 +75,8 @@ class Person{
 public:
     Person(cv::Point3f located, cv::Rect box):if_3d_(true),located_(located),box_(box),width_(box.width){};
     Person(cv::Rect box):box_(box),width_(box.width){};
-
+    Person(cv::Rect box,cv::Point2f P):box_(box),width_(box.width),pixel(P){};
+    Person(cv::Point3f located, cv::Rect box,cv::Point2f P):if_3d_(true),located_(located),box_(box),width_(box.width),pixel(P){};
     inline cv::Point3f get_located(){return located_;};
     inline cv::Rect get_box(){return box_;};
     inline int get_id(){return id_;};
@@ -83,7 +84,7 @@ public:
     inline void set_id(int id){id_=id;};
     inline bool if_track(){return if_track_;};
     inline bool if_3d(){return if_3d_;}
-
+    cv::Point2f pixel;
 private:
     cv::Point3f located_;
     cv::Rect box_;
