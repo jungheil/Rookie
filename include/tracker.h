@@ -6,11 +6,11 @@
 #define XIROBO_TRACKER_H
 
 #endif //XIROBO_TRACKER_H
-#include <opencv4/opencv2/core/utility.hpp>
-#include <opencv4/opencv2/tracking.hpp>
-#include <opencv4/opencv2//videoio.hpp>
-#include <opencv4/opencv2//highgui.hpp>
-#include <opencv4/opencv2/opencv.hpp>
+#include <opencv2/core/utility.hpp>
+#include <opencv2/tracking.hpp>
+#include <opencv2//videoio.hpp>
+#include <opencv2//highgui.hpp>
+#include <opencv2/opencv.hpp>
 #include <iostream>
 #include <cstring>
 #include <vector>

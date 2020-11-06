@@ -139,6 +139,7 @@ int Usart::UsartSend(unsigned char* data)
 
     AppendCRC16CheckSum(buff,kTotalSendLength);
     len = write(Usart::serial_fd_, buff,kTotalSendLength );//实际写入的长度
+    //cout<<(int)data[0]<<","<<(int)data[1]<<endl;
 #ifdef USART_DEBUG
     if(len == kTotalSendLength)
     {

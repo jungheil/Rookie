@@ -5,7 +5,7 @@
 #ifndef XIROBO_COMMON_H
 #define XIROBO_COMMON_H
 
-#include <opencv4/opencv2/opencv.hpp>
+#include <opencv2/opencv.hpp>
 #include <librealsense2/rsutil.h>
 #include <librealsense2/rs.hpp> // Include RealSense Cross Platform API
 
@@ -67,7 +67,7 @@ public:
 //    Camera();
     virtual bool GetImg(Ximg &img)=0;
     inline CAMERA_TYPE GetCamType(){return cam_type_;};
-private:
+protected:
     CAMERA_TYPE cam_type_ = CAMERA_TYPE_UNKOWN;
 };
 

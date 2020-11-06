@@ -4,7 +4,7 @@
 
 #ifndef XIROBO_DETECTOR_H
 #define XIROBO_DETECTOR_H
-#include <opencv4/opencv2/opencv.hpp>
+#include <opencv2/opencv.hpp>
 #include "torch/script.h"
 
 #include "common.h"

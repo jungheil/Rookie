@@ -75,10 +75,9 @@ void ControlThread(CarController *cctrl){
 
 int main(int argc, char * argv[])
 {
-    UVC cam(0);
+    Realsense cam;
     Ximg img;
     CarController cctrl;
-
     thread t1(CameraThread, &cam, &img);
     thread t2(ProcessThread, &img);
     thread t3(ControlThread, &cctrl);

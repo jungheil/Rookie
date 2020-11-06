@@ -6,6 +6,7 @@
 
 
 Realsense::Realsense() {
+    cam_type_ = CAMERA_TYPE_REALSENSE;
     rs2::config cfg;
     cfg.enable_stream(RS2_STREAM_DEPTH,1280,720,RS2_FORMAT_ANY,30);
     cfg.enable_stream(RS2_STREAM_COLOR,1280,720,RS2_FORMAT_BGR8,30);
@@ -36,10 +37,12 @@ bool Realsense::GetImg(Ximg &img) {
 }
 
 UVC::UVC(int cam) {
+    cam_type_ = CAMERA_TYPE_UVC;
     fb_ = cv::VideoCapture(cam);
 }
 
 UVC::UVC(std::string path) {
+    cam_type_ = CAMERA_TYPE_UVC;
     fb_ = cv::VideoCapture(path);
 }
 
