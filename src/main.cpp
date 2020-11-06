@@ -12,16 +12,17 @@ using namespace cv;
 
 std::vector<Person> person;
 
-mutex mut;
+mutex cam_mut;
 
 
 
 void CameraThread(Camera *cam, Ximg *img){
     while(true){
 //        cout << 33<<endl;
-        lock_guard<mutex> lock(mut);
+        lock_guard<mutex> lock(cam_mut);
         //mut.lock();
-        if(img->is_used_) cam->GetImg(*img);
+        //if(img->is_used_) cam->GetImg(*img);
+        cam->GetImg(*img);
         //mut.unlock();
 
     }
@@ -33,7 +34,7 @@ void ProcessThread(Ximg *img){
 
     while(true){
         {
-            lock_guard<mutex> lock(mut);
+            lock_guard<mutex> lock(cam_mut);
             //        mut.lock();
             if (img->is_used_) continue;
             src = *img;

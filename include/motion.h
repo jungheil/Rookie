@@ -9,12 +9,14 @@
 class CarController{
 public:
     enum CARCONTROL_LINEAR{
-        CARCONTROL_LINEAR_FORWARD   =   0,
-        CARCONTROL_LINEAR_BACKWARD  =   1
+        CARCONTROL_LINEAR_ZERO      =   0,
+        CARCONTROL_LINEAR_FORWARD   =   1,
+        CARCONTROL_LINEAR_BACKWARD  =   2
     };
     enum CARCONTROL_ANGULAR{
-        CARCONTROL_ANGULAR_LEFT     =   0,
-        CARCONTROL_ANGULAR_RIGHT    =   1
+        CARCONTROL_ANGULAR_ZERO     =   0,
+        CARCONTROL_ANGULAR_LEFT     =   1,
+        CARCONTROL_ANGULAR_RIGHT    =   2
     };
     void Move(CARCONTROL_LINEAR,unsigned char linear_velocity, CARCONTROL_ANGULAR,unsigned char angular_velocity);
     inline void set_enable_(bool enable){enable_=enable;};
@@ -27,17 +29,21 @@ class Motion {
 public:
     explicit Motion(CarController *controller):controller_(controller){};
     inline void set_target(int id){target_id_ = id;};
-    virtual void Update(std::vector<Person> person)=0;
-private:
+    virtual void Start(std::vector<Person> person, bool is_used) = 0;
+
+protected:
     Person* FindPerson();
-private:
+protected:
     CarController *controller_;
     int target_id_ = -1;
     bool lost_target_ = true;
+    std::vector<Person> person_;
+    Person *tp_;
+
 };
 
 class Motion2D:Motion{
-    void Update(std::vector<Person> person) override;
+    void Start(std::vector<Person> person, bool is_used) override;
 
 
 };
