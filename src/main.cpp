@@ -8,22 +8,26 @@
 #include "tracker.h"
 #include "usart.h"
 #include "Ctracker.h"
+#include "motion.h"
 
 using namespace cv;
 
 std::vector<Person> person;
+bool is_per_used = false;
 
 mutex cam_mut;
-
+mutex per_mut;
 
 
 void CameraThread(Camera *cam, Ximg *img){
+    Ximg temp;
     while(true){
 //        cout << 33<<endl;
+        cam->GetImg(temp);
         lock_guard<mutex> lock(cam_mut);
         //mut.lock();
         //if(img->is_used_) cam->GetImg(*img);
-        cam->GetImg(*img);
+        *img = temp;
         //mut.unlock();
 
     }
@@ -33,6 +37,8 @@ void ProcessThread(Ximg *img){
     CTracker tracker(0.2, 0.5, 60.0, 10, 30);
     Ximg src;
     sleep(1);
+    std::vector<Person> temp_person;
+
     while(true){
         {
             lock_guard<mutex> lock(cam_mut);
@@ -41,14 +47,29 @@ void ProcessThread(Ximg *img){
             src = *img;
             //        mut.unlock();
         }
-        detector.UpdatePerson(src, person);
-        if(person.size()>0){
-            tracker.Update(person);
-            tracker.draw_person(src.get_cv_color());
+        detector.UpdatePerson(src, temp_person);
+        if(temp_person.size()>0){
+            tracker.Update(temp_person);
         }
+        per_mut.lock();
+        person = temp_person;
+        is_per_used = false;
+        per_mut.unlock();
+        tracker.draw_person(src.get_cv_color());
         DrawPred(src.get_cv_color(),person);
         imshow("src",src.get_cv_color());
         waitKey(1);
+    }
+}
+
+void ControlThread(CarController *cctrl){
+    Motion3D motion(cctrl);
+    while (true){
+        motion.set_target(0);
+        per_mut.lock();
+        motion.Start(person,is_per_used);
+        is_per_used = true;
+        per_mut.unlock();
     }
 }
 
@@ -56,12 +77,15 @@ int main(int argc, char * argv[])
 {
     UVC cam(0);
     Ximg img;
+    CarController cctrl;
 
     thread t1(CameraThread, &cam, &img);
     thread t2(ProcessThread, &img);
+    thread t3(ControlThread, &cctrl);
 
     t1.join();
     t2.join();
+    t3.join();
 
     return 0;
 }

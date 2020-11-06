@@ -19,7 +19,7 @@ public:
         CARCONTROL_ANGULAR_RIGHT    =   2
     };
     void Move(CARCONTROL_LINEAR,unsigned char linear_velocity, CARCONTROL_ANGULAR,unsigned char angular_velocity);
-    inline void set_enable_(bool enable){enable_=enable;};
+    void SetEnable(bool enable);
 private:
     Usart usart;
     bool enable_ = true;
@@ -42,7 +42,9 @@ protected:
 
 };
 
-class Motion2D:Motion{
+class Motion3D:public Motion{
+public:
+    Motion3D(CarController *controller):Motion(controller){};
     void Start(std::vector<Person> person, bool is_used) override;
 
 

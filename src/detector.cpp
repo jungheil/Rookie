@@ -206,7 +206,6 @@ namespace XRDetector{
         for (size_t i = 0; i<boxes.size(); i++){
             RectSafety(boxes[i],img.get_cv_color().rows,img.get_cv_color().cols);
             cv::Point3f point;
-            cv::Point2f pixel_point(boxes[i].x+0.5*boxes[i].width,boxes[i].y+0.5*boxes[i].height);
             if (img.cam_->GetCamType() == Camera::CAMERA_TYPE_REALSENSE){
                 Mat mask;
                 GetMask(img,boxes[i],mask);
@@ -235,9 +234,9 @@ namespace XRDetector{
                 point = Pixel2Point(img, pixel,distance);
                 Mat vec = R_b_cam*cv::Vec3f(point.x,point.y,point.z);
                 point = Point3f(vec.at<float>(0,0),vec.at<float>(0,1),vec.at<float>(0,2));
-                person.push_back(Person(point, boxes[i],pixel_point));
+                person.push_back(Person(point, boxes[i]));
             }else{
-                person.push_back(Person(boxes[i],pixel_point));
+                person.push_back(Person(boxes[i]));
             }
         }
         std::vector<cv::Rect>().swap(boxes);
