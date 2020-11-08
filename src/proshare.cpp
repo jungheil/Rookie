@@ -51,14 +51,15 @@ bool ImgService::Public(int width, int height, void* data) {
     if (img_size > IMG_MAX_SIZE) return false;
     semop(mutex_, &sem_lock, 1);
     unsigned char *data_temp = (unsigned char*)data;
-    ImageStr image;
-    image.width_=width;
-    image.height_=height;
-    for(int i=0; i<img_size; i++){
-        image.data_[i] = *data_temp;
+    ImageStr *image = new ImageStr ;
+    image->width_=width;
+    image->height_=height;
+    for(unsigned int i=0; i<img_size; i++){
+        image->data_[i] = *data_temp;
         data_temp++;
     }
-    memcpy(buffer_, &image, sizeof(image));
+    memcpy(buffer_, image, sizeof(*image));
+    delete image;
     semop(mutex_, &sem_unlock, 1);
     return true;
 }
@@ -125,24 +126,25 @@ bool ImgClient::Subscribe(ImageStr &output) {
 }
 
 bool ImgClient::Subscribe(cv::Mat &img) {
-    ImageStr imgstr;
-    Subscribe(imgstr);
+    ImageStr *imgstr = new ImageStr ;
+    Subscribe(*imgstr);
     int count = 0;
     uchar* pxvec;
-    cv::Mat temp(imgstr.height_, imgstr.width_, CV_8UC3);
-    for (int row = 0; row < imgstr.height_; row++)
+    cv::Mat temp(imgstr->height_, imgstr->width_, CV_8UC3);
+    for (int row = 0; row < imgstr->height_; row++)
     {
         pxvec = temp.ptr<uchar>(row);
-        for(int col = 0; col < imgstr.width_; col++)
+        for(int col = 0; col < imgstr->width_; col++)
         {
             for(int c = 0; c < 3; c++)
             {
-                pxvec[col*3+c] = imgstr.data_[count];
+                pxvec[col*3+c] = imgstr->data_[count];
                 count++;
             }
         }
     }
     img = temp;
+    delete imgstr;
     if(img.empty()) return false;
     else return true;
 }

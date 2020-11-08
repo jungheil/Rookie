@@ -10,7 +10,6 @@
 #include <sys/sem.h>
 
 
-#define KEY 650
 #define IMG_MAX_SIZE 1920*1080*3
 
 typedef struct{
@@ -32,7 +31,6 @@ public:
     bool is_init_ = false;
 
 protected:
-    int KEY_ = KEY;
     unsigned char index_;
     char PATHNAME_[5] = "Rkmt";
     int mutex_;
