@@ -64,7 +64,7 @@ public:
         CAMERA_TYPE_REALSENSE = 1,
         CAMERA_TYPE_UVC = 2
     };
-//    Camera();
+    Camera() = default;
     virtual bool GetImg(Ximg &img)=0;
     inline CAMERA_TYPE GetCamType(){return cam_type_;};
 protected:

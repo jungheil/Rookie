@@ -3,12 +3,14 @@
 #include <thread>
 #include <mutex>
 #include <stdbool.h>
+#include <proshare.h>
 #include "camera.h"
 #include "detector.h"
 #include "tracker.h"
 #include "usart.h"
 #include "Ctracker.h"
 #include "motion.h"
+#include "proshare.h"
 
 using namespace cv;
 
@@ -21,15 +23,17 @@ mutex per_mut;
 
 void CameraThread(Camera *cam, Ximg *img){
     Ximg temp;
-    while(true){
-//        cout << 33<<endl;
-        cam->GetImg(temp);
-        lock_guard<mutex> lock(cam_mut);
-        //mut.lock();
-        //if(img->is_used_) cam->GetImg(*img);
-        *img = temp;
-        //mut.unlock();
 
+    while(true){
+        //cout << 33<<endl;
+        cam->GetImg(temp);
+        {
+            lock_guard<mutex> lock(cam_mut);
+            //mut.lock();
+            //if(img->is_used_) cam->GetImg(*img);
+            *img = temp;
+            //mut.unlock();
+        }
     }
 }
 void ProcessThread(Ximg *img){
@@ -38,6 +42,8 @@ void ProcessThread(Ximg *img){
     Ximg src;
     sleep(1);
     std::vector<Person> temp_person;
+    ImgService ser(0);
+
 
     while(true){
         {
@@ -57,9 +63,20 @@ void ProcessThread(Ximg *img){
         per_mut.unlock();
         tracker.draw_person(src.get_cv_color());
         DrawPred(src.get_cv_color(),person);
-        imshow("src",src.get_cv_color());
-        waitKey(1);
+        ser.Public(src.get_cv_color());
+//        imshow("DL",src.get_cv_color());
+//        waitKey(1);
     }
+
+//ImgClient client(0);
+//Mat p;
+//
+//while(1){
+//    client.Subscribe(p);
+//    imshow("1",p);
+//    waitKey(1);
+//
+//}
 }
 
 void ControlThread(CarController *cctrl){
@@ -75,7 +92,7 @@ void ControlThread(CarController *cctrl){
 
 int main(int argc, char * argv[])
 {
-    Realsense cam;
+    UVC cam(0);
     Ximg img;
     CarController cctrl;
     thread t1(CameraThread, &cam, &img);
@@ -116,3 +133,4 @@ int main(int argc, char * argv[])
 //    std::cout<<trans1*trans2<<std::endl;
 //
 //}
+

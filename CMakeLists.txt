@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.5)
 project(Rookie)
 
 SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/bin/")
@@ -13,8 +13,10 @@ set(CMAKE_CXX_STANDARD 14)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src SRCS)
+list(REMOVE_ITEM SRCS ${PROJECT_SOURCE_DIR}/src/pyshare.cpp)
+message(${SRCS})
 add_executable(Rookie ${SRCS})
-add_library(imgshare SHARED src/imgshare.cpp include/imgshare.h)
+add_library(pyshare SHARED src/pyshare.cpp src/proshare.cpp)
 
 target_link_libraries(Rookie
         -pthread
@@ -23,6 +25,6 @@ target_link_libraries(Rookie
         realsense2
         )
 
-target_link_libraries(imgshare
+target_link_libraries(pyshare
         ${OpenCV_LIBS}
         )

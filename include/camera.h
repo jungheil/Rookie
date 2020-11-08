@@ -11,7 +11,7 @@
 #include "common.h"
 
 
-class Realsense:public Camera{
+class Realsense: public Camera{
 public:
     Realsense();
     bool GetImg(Ximg &img);
