@@ -34,7 +34,7 @@ public:
     int max_trace_length;
     vector<CTrack*> tracks;
     void Update(std::vector<Person> &person);
-    void draw_person(cv::Mat &src);
+    void draw_person(cv::Mat &src, std::vector<Person> &person);
     CTracker(float _dt,
              float _Accel_noise_mag,
              double _dist_thres=60,

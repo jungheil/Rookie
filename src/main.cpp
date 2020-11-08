@@ -61,7 +61,7 @@ void ProcessThread(Ximg *img){
         person = temp_person;
         is_per_used = false;
         per_mut.unlock();
-        tracker.draw_person(src.get_cv_color());
+        tracker.draw_person(src.get_cv_color(),person);
         DrawPred(src.get_cv_color(),person);
         ser.Public(src.get_cv_color());
 //        imshow("DL",src.get_cv_color());
@@ -83,10 +83,13 @@ void ControlThread(CarController *cctrl){
     Motion3D motion(cctrl);
     while (true){
         motion.set_target(0);
-        per_mut.lock();
-        motion.Start(person,is_per_used);
-        is_per_used = true;
-        per_mut.unlock();
+        if(!is_per_used){
+            per_mut.lock();
+            motion.UpdatePerson(person);
+            is_per_used = true;
+            per_mut.unlock();
+        }
+        motion.Move();
     }
 }
 

@@ -18,7 +18,7 @@ public:
         CARCONTROL_ANGULAR_LEFT     =   1,
         CARCONTROL_ANGULAR_RIGHT    =   2
     };
-    void Move(CARCONTROL_LINEAR,unsigned char linear_velocity, CARCONTROL_ANGULAR,unsigned char angular_velocity);
+    bool Move(CARCONTROL_LINEAR,unsigned char linear_velocity, CARCONTROL_ANGULAR,unsigned char angular_velocity);
     void SetEnable(bool enable);
 private:
     Usart usart;
@@ -29,7 +29,8 @@ class Motion {
 public:
     explicit Motion(CarController *controller):controller_(controller){};
     inline void set_target(int id){target_id_ = id;};
-    virtual void Start(std::vector<Person> person, bool is_used) = 0;
+    void UpdatePerson(std::vector<Person> person){person_ = person; is_control_ = false;};
+    virtual void Move() = 0;
 
 protected:
     Person* FindPerson();
@@ -39,13 +40,15 @@ protected:
     bool lost_target_ = true;
     std::vector<Person> person_;
     Person *tp_;
+    bool is_control_ = false;
+    int loss_delay_ = 0;
 
 };
 
 class Motion3D:public Motion{
 public:
     Motion3D(CarController *controller):Motion(controller){};
-    void Start(std::vector<Person> person, bool is_used) override;
+    void Move() override;
 
 
 };

@@ -153,7 +153,7 @@ int Usart::UsartSend(unsigned char* data)
         return -1;
     }
 #endif
-    return 0;
+    return len;
 }
 
 int  Usart::UsartRecv(volatile int *data)

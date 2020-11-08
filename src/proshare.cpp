@@ -49,7 +49,6 @@ void ImgService::ImgBufInit() {
 bool ImgService::Public(int width, int height, void* data) {
     unsigned int img_size = width*height*3;
     if (img_size > IMG_MAX_SIZE) return false;
-    semop(mutex_, &sem_lock, 1);
     unsigned char *data_temp = (unsigned char*)data;
     ImageStr *image = new ImageStr ;
     image->width_=width;
@@ -58,9 +57,10 @@ bool ImgService::Public(int width, int height, void* data) {
         image->data_[i] = *data_temp;
         data_temp++;
     }
+    semop(mutex_, &sem_lock, 1);
     memcpy(buffer_, image, sizeof(*image));
-    delete image;
     semop(mutex_, &sem_unlock, 1);
+    delete image;
     return true;
 }
 

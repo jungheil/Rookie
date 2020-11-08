@@ -162,6 +162,7 @@ void CTracker::Update(std::vector<Person> &person)
         {
             tracks[i]->skipped_frames=0;
             tracks[i]->prediction=tracks[i]->KF->Update(person[assignment[i]].get_box_center(), 1);
+            person[assignment[i]].set_id(i);
         }
         else				  // if not continue using predictions
         {
@@ -189,28 +190,35 @@ CTracker::~CTracker(void)
     }
     tracks.clear();
 };
-void CTracker::draw_person(cv::Mat &src){
+void CTracker::draw_person(cv::Mat &src, std::vector<Person> &person){
     for(int i=0;i<this->tracks.size();i++){
         if(this->tracks[i]->trace.size()>1){
-            string str = to_string(i);
-            int num = this->tracks[i]->trace.size();
-            cv::putText(src, // 图像矩阵
-                        str,                  // string型文字内容
-                        Point(this->tracks[i]->trace[num - 1].x,
-                              this->tracks[i]->trace[num - 1].y),           // 文字坐标，以左下角为原点
-                        cv::FONT_HERSHEY_SIMPLEX,   // 字体类型
-                        3, // 字体大小
-                        cv::Scalar(0, 255, 255));
+//            string str = to_string(i);
+//            int num = this->tracks[i]->trace.size();
+//            cv::putText(src, // 图像矩阵
+//                        str,                  // string型文字内容
+//                        Point(this->tracks[i]->trace[num - 1].x,
+//                              this->tracks[i]->trace[num - 1].y),           // 文字坐标，以左下角为原点
+//                        cv::FONT_HERSHEY_SIMPLEX,   // 字体类型
+//                        3, // 字体大小
+//                        cv::Scalar(0, 255, 255));
             for (int j = 0; j < this->tracks[i]->trace.size() - 1; j++) {
                 Point p1 = Point(this->tracks[i]->trace[j].x, this->tracks[i]->trace[j].y);
                 Point p2 = Point(this->tracks[i]->trace[j + 1].x, this->tracks[i]->trace[j + 1].y);
-
                 cv::line(src,
                          p1,
                          p2,
                          Colors[this->tracks[i]->track_id % 8], 2, LINE_AA);
-
             }
         }
+    }
+    for(int i =0;i<person.size();i++){
+        string str = to_string(person[i].get_id());
+        cv::putText(src, // 图像矩阵
+                    str,                  // string型文字内容
+                    person[i].get_box_center(),           // 文字坐标，以左下角为原点
+                    cv::FONT_HERSHEY_SIMPLEX,   // 字体类型
+                    5, // 字体大小
+                    cv::Scalar(255, 255, 255));
     }
 }
