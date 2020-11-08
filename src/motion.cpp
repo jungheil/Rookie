@@ -32,6 +32,7 @@ void CarController::Move(CARCONTROL_LINEAR linear,
         }
     }
     usart.UsartSend(data);
+    usleep(500);
 }
 
 void CarController::SetEnable(bool enable) {
@@ -39,14 +40,16 @@ void CarController::SetEnable(bool enable) {
     if(!enable){
         unsigned char data[2] = {128,128};
         usart.UsartSend(data);
+        usleep(500);
     }
 }
 
 Person* Motion::FindPerson() {
     for (Person &ap: person_){
-        if(ap.get_id() == target_id_){
+        //cout<< "id: "<<ap.get_id()<<endl;
+        //if(ap.get_id() == target_id_){
             return &ap;
-        }
+        //}
     }
     return nullptr;
 }
@@ -58,12 +61,14 @@ void Motion3D::Start(std::vector<Person> person, bool is_used) {
 
     if(lost_target_){
         controller_->SetEnable(false);
+        //cout << "lost_target " << target_id_<<endl;
     }else{
-        int distance;
+        float distance;
         float angle;
         distance = sqrt(pow(tp_->get_located().x,2)+pow(tp_->get_located().z,2));
         angle = atan2(tp_->get_located().x,tp_->get_located().z);
-
+        //<<"distance: "<<distance<<endl;
+        //cout<<"angle:" << angle << endl;
         CarController::CARCONTROL_LINEAR cc_linear;
         CarController::CARCONTROL_ANGULAR cc_angular;
         if(distance>2) cc_linear=CarController::CARCONTROL_LINEAR_FORWARD;
@@ -74,6 +79,7 @@ void Motion3D::Start(std::vector<Person> person, bool is_used) {
         else if(angle < 0.1) cc_angular = CarController::CARCONTROL_ANGULAR_LEFT;
         else cc_angular = CarController::CARCONTROL_ANGULAR_ZERO;
         controller_->SetEnable(true);
-        controller_->Move(cc_linear,200,cc_angular,200);
+//        cout<<"l: "<< cc_linear << "a: "<<cc_angular<<endl;
+        controller_->Move(cc_linear,100,cc_angular,50);
     }
 }
