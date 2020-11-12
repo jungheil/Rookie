@@ -19,6 +19,7 @@ public:
         CARCONTROL_ANGULAR_RIGHT    =   2
     };
     bool Move(CARCONTROL_LINEAR,unsigned char linear_velocity, CARCONTROL_ANGULAR,unsigned char angular_velocity);
+    bool Move(unsigned char data1, unsigned char data2);
     void SetEnable(bool enable);
 private:
     Usart usart;
@@ -42,6 +43,7 @@ protected:
     Person *tp_;
     bool is_control_ = false;
     int loss_delay_ = 0;
+    float last_distance;
 
 };
 

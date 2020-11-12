@@ -37,6 +37,13 @@ bool CarController::Move(CARCONTROL_LINEAR linear,
     return len != -1;
 }
 
+bool CarController::Move(unsigned char data1=128, unsigned char data2=128){
+    unsigned char data[2] = {data1, data2};
+    int len = usart.UsartSend(data);
+    usleep(500);
+    return len != -1;
+}
+
 void CarController::SetEnable(bool enable) {
     enable_ = enable;
     if(!enable){
@@ -61,32 +68,50 @@ void Motion3D::Move() {
     lost_target_ = tp_ == nullptr;
 
     if(lost_target_){
-        if(loss_delay_++ > 250){
-            controller_->Move(CarController::CARCONTROL_LINEAR_ZERO,0,CarController::CARCONTROL_ANGULAR_ZERO,0);
+        if(loss_delay_++ > 100){
+            controller_->Move(CarController::CARCONTROL_LINEAR_ZERO,128,CarController::CARCONTROL_ANGULAR_ZERO,128);
         }
         //cout << "lost_target " << target_id_<<endl;
-    }else if(!is_control_){
+    }else if(!is_control_ ){
         loss_delay_ = 0;
         float distance;
         float angle;
-        distance = sqrt(pow(tp_->get_located().x,2)+pow(tp_->get_located().z,2));
+        distance = tp_->get_distance();
         angle = atan2(tp_->get_located().x,tp_->get_located().z);
         //<<"distance: "<<distance<<endl;
         //cout<<"angle:" << angle << endl;
-        CarController::CARCONTROL_LINEAR cc_linear;
-        CarController::CARCONTROL_ANGULAR cc_angular;
-        if(distance>1.7) cc_linear=CarController::CARCONTROL_LINEAR_FORWARD;
-        else if(distance < 1.2) cc_linear=CarController::CARCONTROL_LINEAR_BACKWARD;
-        else cc_linear = CarController::CARCONTROL_LINEAR_ZERO;
 
-        if(angle > 0.1) cc_angular = CarController::CARCONTROL_ANGULAR_RIGHT;
-        else if(angle < 0.1) cc_angular = CarController::CARCONTROL_ANGULAR_LEFT;
-        else cc_angular = CarController::CARCONTROL_ANGULAR_ZERO;
-        int v_l = (abs(distance - 1.45)/3);
+//        CarController::CARCONTROL_LINEAR cc_linear;
+//        CarController::CARCONTROL_ANGULAR cc_angular;
+//        if(distance>1.7) cc_linear=CarController::CARCONTROL_LINEAR_FORWARD;
+//        else if(distance < 1.2) cc_linear=CarController::CARCONTROL_LINEAR_BACKWARD;
+//        else cc_linear = CarController::CARCONTROL_LINEAR_ZERO;
+//
+//        if(angle > 0.1) cc_angular = CarController::CARCONTROL_ANGULAR_RIGHT;
+//        else if(angle < 0.1) cc_angular = CarController::CARCONTROL_ANGULAR_LEFT;
+//        else cc_angular = CarController::CARCONTROL_ANGULAR_ZERO;
+//
+//       is_control_ = controller_->Move(cc_linear,
+//                          100+(abs(distance - 1.45)/3<1 ? abs(distance - 1.45)/3 : 1)*155,
+//                          cc_angular,
+//                          50 + abs(angle)/3.14*200);
 
-       is_control_ = controller_->Move(cc_linear,
-                          100+(abs(distance - 1.45)/3<1 ? abs(distance - 1.45)/3 : 1)*155,
-                          cc_angular,
-                          50 + abs(angle)/3.14*200);
+        unsigned char v_linear = 128;
+        unsigned char v_angular = 128;
+        if(distance >= 1){
+            //if (abs(last_distance - distance) < 0.5){
+            if (false){
+                unsigned char temp_v = 128-((distance-1)/2*127) + (distance - last_distance)*50;
+                v_linear = 128 - (temp_v > 127 ? 127 : temp_v);
+            }else{
+                v_linear = distance > 3 ? 128:(128-((distance-1)/2*127));
+            }
+        }else{
+            v_linear = 128+50+(1-distance)*77;
+        }
+        int sign = angle > 0 ? 1:-1;
+        v_angular = 128 + (abs(angle)>0.5?sign:angle*2)*127;
+        cout<<(int)v_linear<<", "<<(int)v_angular<<endl;
+        is_control_ = controller_->Move(v_linear,v_angular);
     }
 }

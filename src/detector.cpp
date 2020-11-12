@@ -4,6 +4,8 @@
 
 #include <fstream>
 #include "detector.h"
+#include <math.h>
+
 
 using namespace cv;
 using namespace dnn;
@@ -229,12 +231,13 @@ namespace XRDetector{
                     }
                 }
                 distance=sum/count;
-                //cout<<"dist:"<<distance<<endl;
+                if(!isnormal(distance) || distance < 0.1 || distance > 8) continue;
+                cout<<"dist:"<<distance<<endl;
                 Point pixel = Point(boxes[i].x+0.5*boxes[i].width,boxes[i].y+0.5*boxes[i].height);
                 point = Pixel2Point(img, pixel,distance);
                 Mat vec = R_b_cam*cv::Vec3f(point.x,point.y,point.z);
                 point = Point3f(vec.at<float>(0,0),vec.at<float>(0,1),vec.at<float>(0,2));
-                person.push_back(Person(point, boxes[i]));
+                person.push_back(Person(distance,point, boxes[i]));
             }else{
                 person.push_back(Person(boxes[i]));
             }
