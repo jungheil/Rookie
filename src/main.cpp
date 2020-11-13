@@ -14,6 +14,7 @@
 
 using namespace cv;
 
+
 std::vector<Person> person;
 bool is_per_used = false;
 
@@ -42,7 +43,7 @@ void ProcessThread(Ximg *img){
     Ximg src;
     sleep(1);
     std::vector<Person> temp_person;
-    ImgService ser(0);
+    ImgService ser(1);
 
 
     while(true){
@@ -81,8 +82,14 @@ void ProcessThread(Ximg *img){
 
 void ControlThread(CarController *cctrl){
     Motion3D motion(cctrl);
+    ProService<int> tar_service(2);
+    int temp_tar = -1;
+    tar_service.Public(&temp_tar);
+    ProClient<int> tar_client(2);
+    int target = -1;
     while (true){
-        motion.set_target(0);
+        tar_client.Subscribe(target);
+        motion.set_target(target);
         if(!is_per_used){
             per_mut.lock();
             motion.UpdatePerson(person);

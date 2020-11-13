@@ -4,7 +4,8 @@
 #include "proshare.h"
 
 extern "C"{
-ImgClient client(0);
+// 圖像傳輸
+ProClient<ImageStr> img_client(1);
 ImageStr *imgstr = new ImageStr ;
 
 //ImageStr* PSubscribe_(){
@@ -13,25 +14,32 @@ ImageStr *imgstr = new ImageStr ;
 //    return imgstr;
 //}
 
-bool PSubscribe(){
-    client.Subscribe(*imgstr);
+bool PImg_Subscribe(){
+    img_client.Subscribe(*imgstr);
 }
 
-int PGetWidth(){
+int PImg_GetWidth(){
     return imgstr->width_;
 }
 
-int PGetHeight(){
+int PImg_GetHeight(){
     return imgstr->height_;
 }
 
-uchar* PGetData(){
+uchar* PImg_GetData(){
     return imgstr->data_;
 }
 
-void PRelease(){
+void PImg_Release(){
     delete imgstr;
     imgstr = nullptr;
+}
+
+// 跟蹤目標編號傳輸
+ProService<int> tar_service(2);
+
+bool PTar_Public(int tar){
+    tar_service.Public(&tar);
 }
 
 }

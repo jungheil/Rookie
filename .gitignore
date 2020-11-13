@@ -6,3 +6,4 @@ cmake-build-release
 build
 bin
 lib
+venv

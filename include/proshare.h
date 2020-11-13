@@ -18,56 +18,77 @@ typedef struct{
     unsigned char data_[IMG_MAX_SIZE];
 }ImageStr;
 
-class ImgTrans{
+template <class T>
+class ProTrans{
 public:
-    ImgTrans() = default;
-    ImgTrans(char index):
+    ProTrans() = default;
+    ProTrans(char index):
             is_init_(true),
             index_(index){};
 protected:
     virtual void MutexInit() = 0;
-    virtual void ImgBufInit() = 0;
+    virtual void BufInit() = 0;
 public:
     bool is_init_ = false;
 
 protected:
     unsigned char index_;
-    char PATHNAME_[5] = "Rkmt";
+    char PATHNAME_[10] = "/dev/null";
     int mutex_;
     int shm_id_;
-    ImageStr *buffer_;
-
+    T *buffer_;
     struct sembuf sem_lock{0,-1,SEM_UNDO};
     struct sembuf sem_unlock{0,1,SEM_UNDO};
 };
 
-class ImgService: public ImgTrans{
+template <class T>
+class ProService: public ProTrans<T>{
+public:
+    ProService() = default;
+    ProService(unsigned char index);
+    ~ProService();
+    bool Public(const T *data);
+
+private:
+    void MutexInit();
+    void BufInit();
+};
+
+template <class T>
+class ProClient: public ProTrans<T>{
+public:
+    ProClient() = default;
+    ProClient(unsigned char index);
+    ~ProClient() = default;
+
+    bool Subscribe(T &output);
+private:
+    void MutexInit();
+    void BufInit();
+};
+
+template class ProService<ImageStr>;
+
+class ImgService: public ProService<ImageStr>{
 public:
     ImgService() = default;
-    ImgService(unsigned char index);
-    ~ImgService();
-    bool Public(int width, int height, void* data);
+    ImgService(unsigned char index):ProService<ImageStr>(index){};
+
     bool Public(const cv::Mat &img);
-
-private:
-    void MutexInit();
-    void ImgBufInit();
-
 };
 
-class ImgClient: public ImgTrans{
+template class ProClient<ImageStr>;
+
+class ImgClient: public ProClient<ImageStr>{
 public:
     ImgClient() = default;
-    ImgClient(unsigned char index);
-    ~ImgClient();
+    ImgClient(unsigned char index):ProClient<ImageStr>(index){};
 
-    bool Subscribe(ImageStr &output);
     bool Subscribe(cv::Mat &img);
-private:
-    void MutexInit();
-    void ImgBufInit();
-
 };
+
+template class ProClient<int>;
+template class ProService<int>;
 
 
 
