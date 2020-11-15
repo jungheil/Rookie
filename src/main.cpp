@@ -39,7 +39,7 @@ void CameraThread(Camera *cam, Ximg *img){
 }
 void ProcessThread(Ximg *img){
     XRDetector::Detector detector;
-    CTracker tracker(0.2, 0.5, 60.0, 10, 30);
+    CTracker tracker(0.3, 0.5, 60.0, 10, 20);
     Ximg src;
     sleep(1);
     std::vector<Person> temp_person;

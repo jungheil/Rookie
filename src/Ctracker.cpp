@@ -57,7 +57,7 @@ void CTracker::Update(std::vector<Person> &person)
         // If no tracks yet
         for(int i=0;i<person.size();i++)
         {
-            CTrack* tr=new CTrack(person[i].get_box_center(),dt,Accel_noise_mag);
+            CTrack* tr=new CTrack(person[i].get_located_xz(),dt,Accel_noise_mag);
             tracks.push_back(tr);
         }
     }
@@ -75,7 +75,7 @@ void CTracker::Update(std::vector<Person> &person)
     {
         for(int j=0;j<person.size();j++)
         {
-            Point2d diff=(tracks[i]->prediction-person[j].get_box_center());
+            Point2d diff=(tracks[i]->prediction-person[j].get_located_xz());
             //euclid distance
             dist=sqrtf(diff.x*diff.x+diff.y*diff.y);
             Cost[i][j]=dist;
@@ -145,7 +145,7 @@ void CTracker::Update(std::vector<Person> &person)
     {
         for(int i=0;i<not_assigned_detections.size();i++)
         {
-            CTrack* tr=new CTrack(person[not_assigned_detections[i]].get_box_center(),dt,Accel_noise_mag);
+            CTrack* tr=new CTrack(person[not_assigned_detections[i]].get_located_xz(),dt,Accel_noise_mag);
             tracks.push_back(tr);
         }
     }
@@ -161,7 +161,7 @@ void CTracker::Update(std::vector<Person> &person)
         if(assignment[i] >= 0 && assignment[i] < M) // If we have assigned detect, then update using its coordinates,
         {
             tracks[i]->skipped_frames=0;
-            tracks[i]->prediction=tracks[i]->KF->Update(person[assignment[i]].get_box_center(), 1);
+            tracks[i]->prediction=tracks[i]->KF->Update(person[assignment[i]].get_located_xz(), 1);
             person[assignment[i]].set_id(i);
         }
         else				  // if not continue using predictions
