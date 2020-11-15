@@ -98,19 +98,20 @@ void Motion3D::Move() {
 
         unsigned char v_linear = 128;
         unsigned char v_angular = 128;
-        if(distance >= 1){
+        float tar_distance = 1.5;
+        if(distance >= tar_distance){
             //if (abs(last_distance - distance) < 0.5){
             if (false){
                 unsigned char temp_v = 128-((distance-1)/2*127) + (distance - last_distance)*50;
                 v_linear = 128 - (temp_v > 127 ? 127 : temp_v);
             }else{
-                v_linear = distance > 3 ? 128:(128-((distance-1)/2*127));
+                v_linear = distance > 3 ? 1:(128-50-((distance-tar_distance)/(3-tar_distance)*77));
             }
         }else{
-            v_linear = 128+50+(1-distance)*77;
+            v_linear = 128+77+(tar_distance-distance)/tar_distance*50;
         }
         int sign = angle > 0 ? 1:-1;
-        v_angular = 128 + (abs(angle)>0.5?sign:angle*2)*127;
+        v_angular = 128 + (abs(angle)>0.3?sign:angle/0.3)*127;
         cout<<(int)v_linear<<", "<<(int)v_angular<<endl;
         is_control_ = controller_->Move(v_linear,v_angular);
     }

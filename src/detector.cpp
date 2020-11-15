@@ -199,6 +199,12 @@ namespace XRDetector{
 
     Detector::Detector() {
         R_b_cam = Mat::eye(3,3,CV_32FC1);
+        R_b_cam.at<float>(0,0) =cos(10/180*3.1415926);
+        R_b_cam.at<float>(0,1) =-sin(10/180*3.1415926);
+        R_b_cam.at<float>(1,0) =sin(10/180*3.1415926);
+        R_b_cam.at<float>(1,1) =cos(10/180*3.1415926);
+
+
     }
 
     void Detector::UpdatePerson(Ximg img, std::vector<Person> &person){
@@ -236,6 +242,7 @@ namespace XRDetector{
                 Point pixel = Point(boxes[i].x+0.5*boxes[i].width,boxes[i].y+0.5*boxes[i].height);
                 point = Pixel2Point(img, pixel,distance);
                 Mat vec = R_b_cam*cv::Vec3f(point.x,point.y,point.z);
+
                 point = Point3f(vec.at<float>(0,0),vec.at<float>(0,1),vec.at<float>(0,2));
                 person.push_back(Person(distance,point, boxes[i]));
             }else{
