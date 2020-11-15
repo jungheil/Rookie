@@ -114,6 +114,20 @@ int main(int argc, char * argv[])
     t2.join();
     t3.join();
 
+//    while(true){
+//        cam.GetImg(img);
+//        XRDetector::Detector detector;
+//        CTracker tracker(0.2, 0.5, 60.0, 10, 30);
+//        detector.UpdatePerson(img, person);
+//        if(person.size()>0){
+//            tracker.Update(person);
+//        }
+//        tracker.draw_person(img.get_cv_color(),person);
+//        DrawPred(img.get_cv_color(),person);
+//        imshow("111",img.get_cv_color());
+//        waitKey(1);
+//    }
+
     return 0;
 }
 
