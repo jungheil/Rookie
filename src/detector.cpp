@@ -238,7 +238,7 @@ namespace XRDetector{
                 }
                 distance=sum/count;
                 if(!isnormal(distance) || distance < 0.1 || distance > 8) continue;
-                cout<<"dist:"<<distance<<endl;
+//                cout<<"dist:"<<distance<<endl;
                 Point pixel = Point(boxes[i].x+0.5*boxes[i].width,boxes[i].y+0.5*boxes[i].height);
                 point = Pixel2Point(img, pixel,distance);
                 Mat vec = R_b_cam*cv::Vec3f(point.x,point.y,point.z);

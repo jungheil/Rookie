@@ -59,6 +59,7 @@ Person* Motion::FindPerson() {
         if(ap.get_id() == target_id_){
             return &ap;
         }
+//        return &ap;
     }
     return nullptr;
 }
@@ -105,14 +106,18 @@ void Motion3D::Move() {
                 unsigned char temp_v = 128-((distance-1)/2*127) + (distance - last_distance)*50;
                 v_linear = 128 - (temp_v > 127 ? 127 : temp_v);
             }else{
-                v_linear = distance > 3 ? 1:(128-50-((distance-tar_distance)/(3-tar_distance)*77));
+                v_linear = distance > 3 ? 1:(128-((distance-tar_distance)/(3-tar_distance)*127));
             }
         }else{
             v_linear = 128+77+(tar_distance-distance)/tar_distance*50;
         }
         int sign = angle > 0 ? 1:-1;
-        v_angular = 128 + (abs(angle)>0.3?sign:angle/0.3)*127;
-        cout<<(int)v_linear<<", "<<(int)v_angular<<endl;
+        if (abs(angle) < 0.04){
+            v_angular = 128;
+        }else{
+            v_angular = 128 + (abs(angle)>0.3?sign:angle/0.3)*127;
+        }
+        //cout<<(int)v_linear<<", "<<(int)v_angular<<endl;
         is_control_ = controller_->Move(v_linear,v_angular);
     }
 }
