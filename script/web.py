@@ -1,19 +1,11 @@
 #!/usr/bin/env python3
 
-# import sys
-# import ctypes
-# import cv2
-# import numpy as np
 
-# class ImageStr(ctypes.Structure):
-#     _fields_ = [("width_", ctypes.c_int), ("height_", ctypes.c_int), ("data_", ctypes.c_void_p)]
-from flask import Flask, render_template, Response
-import sys
 import ctypes
 import cv2
 import numpy as np
-from flask import Flask, request, render_template
-from flask import make_response
+from flask import Flask, request, render_template, make_response, Response
+from gevent import pywsgi
 
 def SubInit():
     ll = ctypes.cdll.LoadLibrary
@@ -53,9 +45,6 @@ class VideoCamera:
 
 
 
-
-
-
 lib = SubInit()
 
 app = Flask(__name__)
@@ -79,23 +68,21 @@ def video_feed():
     return Response(gen(VideoCamera()),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
-#@app.route('/')
-#def my_form():
-#   return render_template('search.html')
 
 @app.route('/', methods=['POST'])
 def my_form_post():
-    text = request.form['text']
+    text = request.form['index']
     processed_text = text.upper()
     lib.PTar_Public(int(processed_text))
     response = make_response(render_template('index.html'))
-    #response.set_cookie('name', 'hw',100)
     return response
     #return Response(gen(VideoCamera()),
     #                mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True, port=80)
+    # app.run(host='0.0.0.0', debug=True, port=80)
+    server = pywsgi.WSGIServer(('0.0.0.0', 80), app)
+    server.serve_forever()
 
 
     #cv2.waitKey(1)

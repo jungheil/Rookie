@@ -8,6 +8,12 @@
 * opencv4
 * realsense
 * libtorch
+---
+* web交互程序依賴：
+   + python3
+   + flask
+   + gevent
+   + opencv-python
 
 ### 开始
 
@@ -47,10 +53,16 @@
    ```bash
    mkdir build
    cd build
-   cmake ..
-   make -j4
+   cmake -DCMAKE_BUILD_TYPE=Release ..
+   make -j6
    ```
-
+---
+* web交互界面依賴安裝
+   ```bash
+   pip3 install opencv-python
+   pip3 install flask
+   pip3 install gevent
+   ```
    
 
 ### 参考
