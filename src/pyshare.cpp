@@ -7,6 +7,7 @@ extern "C"{
 // 圖像傳輸
 ProClient<ImageStr> img_client(1);
 ImageStr *imgstr = new ImageStr ;
+int target = -1;
 
 //ImageStr* PSubscribe_(){
 //    ImageStr *imgstr = new ImageStr ;
@@ -39,7 +40,8 @@ void PImg_Release(){
 ProService<int> tar_service(2);
 
 bool PTar_Public(int tar){
-    tar_service.Public(&tar);
+    target = tar;
+    tar_service.Public(&target);
 }
 
 }
