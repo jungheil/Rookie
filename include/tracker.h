@@ -18,8 +18,18 @@
 #include "common.h"
 class TracKer{
 public:
-    TracKer(){};
+    TracKer(){
+
+        multiTracker = cv::MultiTracker::create();
+        size =0;
+        success=0;
+    };
     ~TracKer(){};
-    int tracking(cv::Mat &src,std::vector<Person> &person,cv::VideoCapture capture);
-    void getRandomColors(std::vector<cv::Scalar> &colors, int numColors);
+    int size;
+    int success;
+    void creat(cv::Mat &src,std::vector<Person> &person);
+    int update(cv::Mat &src,std::vector<Person> &person);
+    cv::Ptr<cv::MultiTracker> multiTracker;
+//    int tracking(cv::Mat &src,std::vector<Person> &person,cv::VideoCapture capture);
+//    void getRandomColors(std::vector<cv::Scalar> &colors, int numColors);
 };

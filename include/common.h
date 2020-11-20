@@ -86,11 +86,13 @@ public:
     inline cv::Point2f get_box_center(){return box_center_;};
     inline int get_id(){return id_;};
     inline cv::Point2f get_located_xz(){return locater_x_z;};
+    inline cv::Rect get_next_box_(){return next_box_;};
 
     inline void set_id(int id){id_=id;};
     inline bool if_track(){return if_track_;};
     inline bool if_3d(){return if_3d_;};
     inline float get_distance(){return distance_;};
+    inline void set_next_box_(cv::Rect &Box){next_box_=Box;};
     //cv::Point2f pixel;
 private:
     cv::Point3f located_;
@@ -102,6 +104,7 @@ private:
     int id_ = -1;
     bool if_track_;
     bool if_3d_ = false;
+    cv::Rect next_box_;
 };
 
 typedef struct{

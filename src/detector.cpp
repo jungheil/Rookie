@@ -324,5 +324,52 @@ namespace XRDetector{
         delete distance;
 
     }
+    void Detector::UpdatePerson_by_kcf(Ximg img,std::vector<Person> &person){
+        std::vector<cv::Rect> boxes;
+        for(int i =0;i<person.size();i++){
+            boxes.push_back(person[i].get_next_box_());
+        }
+        person.clear();
+        for (size_t i = 0; i<boxes.size(); i++){
+            RectSafety(boxes[i],img.get_cv_color().rows,img.get_cv_color().cols);
+            cv::Point3f point;
+            if (img.cam_->GetCamType() == Camera::CAMERA_TYPE_REALSENSE){
+                Mat mask;
+                GetMask(img,boxes[i],mask);
+                float distance=0;
+                float dists[16];
+                for (int j = 0; j<4;j++){
+                    for(int k=0; k<4;k++){
+                        if (mask.at<uchar>(mask.rows/5*(1+k),mask.cols/5*(1+j))==255){
+                            dists[j*4+k]=img.get_rs_depth().get_distance(mask.cols/5*(1+j)+boxes[i].x,mask.rows/5*(1+k)+boxes[i].y);
+                        }else{
+                            dists[j*4+k]=0;
+                        }
+                    }
+                }
+                int count=0;
+                float sum=0;
+                for (int i=0; i<16;i++){
+                    if (dists[i] !=0){
+                        sum+=dists[i];
+                        count++;
+                    }
+                }
+                distance=sum/count;
+                if(!isnormal(distance) || distance < 0.1 || distance > 8) continue;
+//                cout<<"dist:"<<distance<<endl;
+                Point pixel = Point(boxes[i].x+0.5*boxes[i].width,boxes[i].y+0.5*boxes[i].height);
+                point = Pixel2Point(img, pixel,distance);
+                Mat vec = R_b_cam*cv::Vec3f(point.x,point.y,point.z);
+
+                point = Point3f(vec.at<float>(0,0),vec.at<float>(0,1),vec.at<float>(0,2));
+                person.push_back(Person(distance,point, boxes[i]));
+            }else{
+                person.push_back(Person(boxes[i]));
+            }
+        }
+        std::vector<cv::Rect>().swap(boxes);
+    }
 }
+
 

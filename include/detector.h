@@ -61,6 +61,7 @@ namespace XRDetector{
     public:
         Detector();
         void UpdatePerson(Ximg img, std::vector<Person> &person);
+        void UpdatePerson_by_kcf(Ximg img,std::vector<Person> &person);
         void GetMask(Ximg img, cv::Rect box, cv::Mat& out);
 
     private:
