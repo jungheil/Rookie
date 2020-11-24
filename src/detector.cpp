@@ -269,7 +269,6 @@ namespace XRDetector{
             for(int i =0;i<person.size();i++){
                 Mat map = img.get_cv_color();
                 Mat obj = map(person[i].get_box());
-                obj = obj&
                 resize(obj,obj,cv::Size(128, 128), CV_8UC1);//调整样本大小
 //            imshow("debug",obj);
                 person[i].compute_hog_feature(obj);
