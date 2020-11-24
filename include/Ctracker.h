@@ -16,6 +16,7 @@ public:
     vector<Point2d> trace;
     static size_t NextTrackID;
     size_t track_id;
+    std::vector<float> descriptors;
     size_t skipped_frames;
     Point2f prediction;
     TKalmanFilter* KF;
@@ -35,6 +36,7 @@ public:
     vector<CTrack*> tracks;
     void Update(std::vector<Person> &person);
     void draw_person(cv::Mat &src, std::vector<Person> &person);
+    void update_by_kcf(int &num,std::vector<Point2f> &kcf_trace);
     CTracker(float _dt,
              float _Accel_noise_mag,
              double _dist_thres=60,

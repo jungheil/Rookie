@@ -138,3 +138,16 @@ cv::Mat Coordinate::get_trans_ (){
         return trans_;
     }
 }
+void Person::compute_hog_feature(cv::Mat &src) {
+    cv::Mat data;
+//    resize(src,data,cv::Size(128, 128), CV_8UC1);//调整样本大小
+    cv::cvtColor(src,data,cv::COLOR_BGR2GRAY);
+    threshold(data,data,0,255,cv::THRESH_OTSU);//大津法自适应二值化样本
+    cv::HOGDescriptor *hog = new cv::HOGDescriptor(cv::Size(128, 128),
+                                                   cv::Size(16, 16),
+                                                   cv::Size(8, 8),
+                                                   cv::Size(8, 8), 9);//创建HOG描述器
+    descriptors.clear();
+    hog->compute(src, descriptors, cv::Size(1, 1),
+                 cv::Size(0, 0)); //Hog特征计算
+}

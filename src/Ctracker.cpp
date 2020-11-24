@@ -58,6 +58,7 @@ void CTracker::Update(std::vector<Person> &person)
         for(int i=0;i<person.size();i++)
         {
             CTrack* tr=new CTrack(person[i].get_located_xz(),dt,Accel_noise_mag);
+            tr->descriptors = person[i].descriptors;
             tracks.push_back(tr);
         }
     }
@@ -160,6 +161,15 @@ void CTracker::Update(std::vector<Person> &person)
 
         if(assignment[i] >= 0 && assignment[i] < M) // If we have assigned detect, then update using its coordinates,
         {
+            if(tracks[i]->descriptors.size()>0&&person[assignment[i]].descriptors.size()>0){
+                double dis=0;
+                for (int j = 0; j < tracks[i]->descriptors.size(); j++)
+                {
+                    dis += pow(tracks[i]->descriptors[j]-person[assignment[i]].descriptors[j], 2);
+                }
+                cout<<i<<"号相似度"<<dis<<"\n";
+            }
+            tracks[i]->descriptors=person[assignment[i]].descriptors;
             tracks[i]->skipped_frames=0;
             tracks[i]->prediction=tracks[i]->KF->Update(person[assignment[i]].get_located_xz(), 1);
             person[assignment[i]].set_id(i);
@@ -221,4 +231,17 @@ void CTracker::draw_person(cv::Mat &src, std::vector<Person> &person){
                     5, // 字体大小
                     cv::Scalar(255, 255, 255));
     }
+}
+void CTracker::update_by_kcf(int &num, std::vector<Point2f> &kcf_trace) {
+    if(tracks.size()<num){
+        cout<<"不存在這個tracker"<<"\n";
+        return;
+    }
+    for(int i=0;i<kcf_trace.size();i++){
+        tracks[num]->KF->GetPrediction();
+        tracks[num]->skipped_frames=0;
+        tracks[num]->prediction=tracks[num]->KF->Update(kcf_trace[i], 1);
+    }
+
+
 }

@@ -91,6 +91,8 @@ public:
     inline bool if_track(){return if_track_;};
     inline bool if_3d(){return if_3d_;};
     inline float get_distance(){return distance_;};
+    void compute_hog_feature(cv::Mat &src);//计算hog特征向量
+    std::vector<float> descriptors;
     //cv::Point2f pixel;
 private:
     cv::Point3f located_;
