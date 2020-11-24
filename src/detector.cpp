@@ -244,6 +244,22 @@ namespace XRDetector{
                 Mat vec = R_b_cam*cv::Vec3f(point.x,point.y,point.z);
 
                 point = Point3f(vec.at<float>(0,0),vec.at<float>(0,1),vec.at<float>(0,2));
+
+                // mask更新box
+                vector<vector<Point>> contours;
+                vector<Vec4i> hierarcy;
+                findContours(mask, contours, hierarcy, RETR_EXTERNAL, CHAIN_APPROX_NONE);
+                vector<Point> contour;
+                for(const auto &s:contours){
+                    if(s.size()>contour.size()) contour = s;
+                }
+                if (contour.size()!=0){
+                    Rect mask_box = boundingRect(Mat(contour));
+                    mask_box.x = mask_box.x + boxes[i].x;
+                    mask_box.y = mask_box.y + boxes[i].y;
+                    boxes[i] = mask_box;
+                }
+
                 person.push_back(Person(distance,point, boxes[i]));
             }else{
                 person.push_back(Person(boxes[i]));
