@@ -94,6 +94,12 @@ public:
     void compute_hog_feature(cv::Mat &src);//计算hog特征向量
     std::vector<float> descriptors;
     //cv::Point2f pixel;
+    void set_tracked(bool tracked){tracked_=tracked;};
+    bool get_tracked(){return tracked_;};
+    void set_kcf_tracked(bool tracked){kcf_tracked_=tracked;};
+    bool get_kcf_tracked(){return kcf_tracked_;};
+    void set_box(cv::Rect box){box_ = box;};
+
 private:
     cv::Point3f located_;
     cv::Rect box_;
@@ -104,6 +110,21 @@ private:
     int id_ = -1;
     bool if_track_;
     bool if_3d_ = false;
+    bool tracked_ = false;
+    bool kcf_tracked_ = false;
+};
+
+class PersonHistory{
+public:
+    explicit PersonHistory(int id):id_(id){};
+    int get_id(){return id_;};
+
+public:
+    std::vector<cv::Point2f> located;
+
+private:
+    int id_;
+
 };
 
 typedef struct{

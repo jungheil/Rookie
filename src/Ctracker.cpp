@@ -49,6 +49,9 @@ CTracker::CTracker(float _dt, float _Accel_noise_mag, double _dist_thres, int _m
 // ---------------------------------------------------------------------------
 void CTracker::Update(std::vector<Person> &person)
 {
+    for(auto &s:person){
+        s.set_tracked(false);
+    }
     // -----------------------------------
     // If there is no tracks yet, then every point begins its own track.
     // -----------------------------------
@@ -173,6 +176,7 @@ void CTracker::Update(std::vector<Person> &person)
             tracks[i]->skipped_frames=0;
             tracks[i]->prediction=tracks[i]->KF->Update(person[assignment[i]].get_located_xz(), 1);
             person[assignment[i]].set_id(i);
+            person[assignment[i]].set_tracked(true);
         }
         else				  // if not continue using predictions
         {
@@ -232,7 +236,7 @@ void CTracker::draw_person(cv::Mat &src, std::vector<Person> &person){
                     cv::Scalar(255, 255, 255));
     }
 }
-void CTracker::update_by_kcf(int &num, std::vector<Point2f> &kcf_trace) {
+void CTracker::update_by_kcf(int num, std::vector<Point2f> &kcf_trace) {
     if(tracks.size()<num){
         cout<<"不存在這個tracker"<<"\n";
         return;

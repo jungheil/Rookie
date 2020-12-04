@@ -36,7 +36,7 @@ public:
     vector<CTrack*> tracks;
     void Update(std::vector<Person> &person);
     void draw_person(cv::Mat &src, std::vector<Person> &person);
-    void update_by_kcf(int &num,std::vector<Point2f> &kcf_trace);
+    void update_by_kcf(int num,std::vector<Point2f> &kcf_trace);
     CTracker(float _dt,
              float _Accel_noise_mag,
              double _dist_thres=60,
