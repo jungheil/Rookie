@@ -5,6 +5,9 @@
 #include "common.h"
 #include <sys/time.h>
 
+using namespace std;
+using namespace cv;
+
 Ximg& Ximg::operator=(Ximg &ximg){
     cam_ = ximg.cam_;
     rs_intrinsics_ = ximg.rs_intrinsics_;
@@ -150,4 +153,91 @@ void Person::compute_hog_feature(cv::Mat &src) {
     descriptors.clear();
     hog->compute(src, descriptors, cv::Size(1, 1),
                  cv::Size(0, 0)); //Hog特征计算
+}
+
+void Person::Update(float distance, const cv::Point3f &located, const cv::Rect &box) {
+    distance_ = distance;
+    located_ = located;
+    box_ = box;
+    box_center_ = cv::Point2f(box_.x+0.5*box_.width,box_.y+0.5*box_.height);
+    locater_x_z = cv::Point2f(located.x,located.z);
+}
+
+void GetMask(Ximg img, cv::Rect box, cv::Mat& out) {
+//        rs2::colorizer color_map_(2);
+//        cv::Mat img_d(cv::Size(img.get_rs_depth().get_width(), img.get_rs_depth().get_height()),
+//                CV_8UC3, (void*)img.get_rs_depth().apply_filter(color_map_).get_data(), cv::Mat::AUTO_STEP);
+////        img_d=img_d(person.box_);
+//        Mat gray;
+//        cvtColor(img_d, gray, COLOR_BGR2GRAY);
+//        Mat dst;
+//        imshow("1112",gray);
+//        waitKey(0);
+
+
+    float **distance = new float*[box.height];
+    float max_dist=0.5;
+    float min_dist=6;
+    for(int i=0; i<box.height; i++){
+        distance[i] = new float[box.width];
+        for(int j=0; j<box.width; j++){
+            distance[i][j] = img.get_rs_depth().
+                    get_distance(box.x+j,box.y+i);
+//                if (distance[i][j]<min_dist) min_dist=distance[i][j];
+//                if (distance[i][j]>max_dist) max_dist=distance[i][j];
+        }
+    }
+
+    float breadth = max_dist-min_dist;
+    Mat roi(box.height,box.width,CV_8UC1);
+    for(int i=0;i<box.height;i++){
+        for(int j=0; j<box.width;j++){
+            float size=distance[i][j]-min_dist;
+            size = size < 0 ? 0 : size;
+            size = size > 255 ? 255 : size;
+            roi.ptr<uchar>(i)[j]=(distance[i][j]-min_dist)/breadth*255;
+        }
+    }
+//        Mat gray;
+//        cvtColor(img.get_cv_color(),gray,COLOR_BGR2GRAY);
+//        gray=gray(person.box_);
+//        Canny(gray,gray,50,100*2);
+//        Canny(roi,roi,50,100*2);
+    Mat element10 = getStructuringElement(MORPH_RECT, Size(25, 25));
+    Mat element25 = getStructuringElement(MORPH_RECT, Size(25, 25));
+
+//        dilate(gray, gray, element);
+//        dilate(roi, roi, element);
+//        erode(roi, roi, element);
+//        threshold(roi,roi,0,255,THRESH_BINARY|THRESH_OTSU);
+    erode(roi, roi, element10);
+    dilate(roi, roi, element25);
+    Mat dst;
+    int reliable=0;
+    for(int i=0;i<3;i++){
+        Mat fill = To3Channels(roi);
+        Rect ccomp;
+        floodFill(fill,Point(roi.cols/2,roi.rows*(1+i)/4),Scalar(255,0,0),&ccomp, Scalar(1, 1, 1),Scalar(1, 1, 1));
+        inRange(fill,Scalar(255,0,0),Scalar(255,0,0),fill);
+        int pixel_sum = sum(fill)[0];
+        if(pixel_sum>reliable){
+            dst = fill;
+            reliable = pixel_sum;
+        }
+    }
+    erode(dst, dst, element25);
+    vector<Mat> channels;
+    split(dst,channels);
+    channels[0].copyTo(out);
+    for(int i=0; i<box.height; i++){
+        delete [] distance[i];
+    }
+    delete distance;
+
+}
+
+bool RectSafety(cv::Rect2d &brect, int cols, int rows) {
+    cv::Rect2d out_rect=cv::Rect(0,0,cols,rows);
+    brect=brect&out_rect;
+    return brect.area()!=0;
 }

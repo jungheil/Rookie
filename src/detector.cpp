@@ -62,7 +62,7 @@ namespace XRDetector{
                     int top = centerY - height / 2;
 
                     confidences.push_back((float)confidence);
-                    boxes.push_back(Rect(left, top, width, height));
+                    boxes.emplace_back(left, top, width, height);
                 }
             }
         }
@@ -117,7 +117,7 @@ namespace XRDetector{
         // preds: [?, 15120, 9]
         torch::Tensor preds = module_.forward({imgTensor}).toTuple()->elements()[0].toTensor();
         std::vector<torch::Tensor> dets = NonMaxSuppression(preds);
-        if (dets.size() > 0)
+        if (!dets.empty())
         {
             // Visualize result
             for (size_t i=0; i < dets[0].sizes()[0]; ++ i)
@@ -129,7 +129,7 @@ namespace XRDetector{
                 float score = dets[0][i][4].item().toFloat();
                 int classID = dets[0][i][5].item().toInt();
                 if(classID != 0) continue;
-                outs.push_back(cv::Rect(left, top, (right - left), (bottom - top)));
+                outs.emplace_back(left, top, (right - left), (bottom - top));
 
             }
         }
@@ -230,9 +230,9 @@ namespace XRDetector{
                 }
                 int count=0;
                 float sum=0;
-                for (int i=0; i<16;i++){
-                    if (dists[i] !=0){
-                        sum+=dists[i];
+                for (int j=0; j<16;j++){
+                    if (dists[j] !=0){
+                        sum+=dists[j];
                         count++;
                     }
                 }
@@ -245,24 +245,24 @@ namespace XRDetector{
 
                 point = Point3f(vec.at<float>(0,0),vec.at<float>(0,1),vec.at<float>(0,2));
 
-                // mask更新box
-                vector<vector<Point>> contours;
-                vector<Vec4i> hierarcy;
-                findContours(mask, contours, hierarcy, RETR_EXTERNAL, CHAIN_APPROX_NONE);
-                vector<Point> contour;
-                for(const auto &s:contours){
-                    if(s.size()>contour.size()) contour = s;
-                }
-                if (contour.size()!=0){
-                    Rect mask_box = boundingRect(Mat(contour));
-                    mask_box.x = mask_box.x + boxes[i].x;
-                    mask_box.y = mask_box.y + boxes[i].y;
-                    boxes[i] = mask_box;
-                }
+//                // mask更新box
+//                vector<vector<Point>> contours;
+//                vector<Vec4i> hierarcy;
+//                findContours(mask, contours, hierarcy, RETR_EXTERNAL, CHAIN_APPROX_NONE);
+//                vector<Point> contour;
+//                for(const auto &s:contours){
+//                    if(s.size()>contour.size()) contour = s;
+//                }
+//                if (contour.size()!=0){
+//                    Rect mask_box = boundingRect(Mat(contour));
+//                    mask_box.x = mask_box.x + boxes[i].x;
+//                    mask_box.y = mask_box.y + boxes[i].y;
+//                    boxes[i] = mask_box;
+//                }
 
-                person.push_back(Person(distance,point, boxes[i]));
+                person.emplace_back(distance,point, boxes[i]);
             }else{
-                person.push_back(Person(boxes[i]));
+                person.emplace_back(boxes[i]);
             }
         }
         if(person.size()>0){
@@ -354,7 +354,7 @@ namespace XRDetector{
         for(int i=0; i<box.height; i++){
             delete [] distance[i];
         }
-        delete distance;
+        delete[] distance;
 
     }
 }
