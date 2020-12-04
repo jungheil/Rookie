@@ -99,6 +99,7 @@ public:
     void set_kcf_tracked(bool tracked){kcf_tracked_=tracked;};
     bool get_kcf_tracked(){return kcf_tracked_;};
     void set_box(cv::Rect box){box_ = box;};
+    void Update(float distance, const cv::Point3f &located, const cv::Rect &box);
 
 private:
     cv::Point3f located_;
@@ -160,7 +161,9 @@ private:
     cv::Mat trans_ = cv::Mat::eye(cv::Size(4,4),CV_32FC1);
 };
 
+void GetMask(Ximg img, cv::Rect box, cv::Mat& out);
 
+bool RectSafety(cv::Rect2d &brect, int cols, int rows);
 
 
 

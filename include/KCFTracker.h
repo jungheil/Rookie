@@ -6,15 +6,15 @@
 
 class KCFTracker {
 public:
-KCFTracker() ;
-void InitKCF(cv::Mat &img, std::vector<Person*> person);
-void Update(Ximg &img, std::vector<Person*> person);
+    KCFTracker() ;
+    void InitKCF(cv::Mat &img, std::vector<Person*> &person);
+    void Update(Ximg &img, std::vector<Person*> &person);
 
 private:
-float detect_thresh_ = 0.4f;
-cv::TrackerKCF::Params params_;
-std::vector<cv::Ptr<cv::Tracker>> trackers_;
-
+    float detect_thresh_ = 0.5f;
+    cv::TrackerKCF::Params params_;
+    std::vector<cv::Ptr<cv::Tracker>> trackers_;
+    cv::Mat R_b_cam;
 };
 
 #endif

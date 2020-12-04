@@ -98,6 +98,7 @@ mutex KCF_MUT;
     Ximg src;
     sleep(1);
     bool update = false;
+    cv::Mat sort_img;
     KCFTracker tracker;
     std::vector<Person> temp_person;
     std::vector<Person*> track_person;
@@ -110,8 +111,10 @@ mutex KCF_MUT;
         update = SORT_UPDATE;
         if(SORT_UPDATE) {
             temp_person = SORT_PERSON;
+            sort_img = SORT_IMG;
             SORT_UPDATE = false;
             person_his.clear();
+            track_person.clear();
         }
         KCF_MUT.unlock();
         for(auto &s:temp_person){
@@ -120,11 +123,14 @@ mutex KCF_MUT;
         }
         if(track_person.empty()) continue;
         if(update){
-            tracker.InitKCF(SORT_IMG, track_person);
+            tracker.InitKCF(sort_img, track_person);
         }
 
         CAM_MUT.lock();
-        if (KCF_IMG_USED) continue;
+        if (KCF_IMG_USED) {
+            CAM_MUT.unlock();
+            continue;
+        }
         src = *img;
         KCF_IMG_USED = true;
         CAM_MUT.unlock();
