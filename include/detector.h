@@ -33,8 +33,8 @@ namespace XRDetector{
         void Process(const std::vector<cv::Mat>& outs);
 
     private:
-        cv::String modelConfiguration_ = "../ml/yolov3_tiny/yolov3-tiny.cfg";
-        cv::String modelWeights_ = "../ml/yolov3_tiny/yolov3-tiny_44000.weights";
+        cv::String modelConfiguration_ = "../ml/yolov3.cfg";
+        cv::String modelWeights_ = "../ml/yolov3.weights";
 
         std::vector<std::string> classes_;
         cv::dnn::Net net_;
@@ -65,6 +65,7 @@ namespace XRDetector{
 
     private:
         MLTorch ml;
+//        MLCV ml;
         cv::Mat R_b_cam;  //相机坐标系在基坐标系下表达
     };
 }

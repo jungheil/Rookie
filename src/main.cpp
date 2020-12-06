@@ -56,6 +56,8 @@ mutex KCF_MUT;
     Ximg src;
     sleep(1);
     std::vector<Person> temp_person;
+    std::vector<PersonHistory> KCF_person;
+
 
 
     while(true){
@@ -72,15 +74,17 @@ mutex KCF_MUT;
             tracker.Update(temp_person);
         }
         KCF_MUT.lock();
+        SORT_PERSON.clear();
         SORT_PERSON = temp_person;
         SORT_IMG = img->get_cv_color().clone();
         SORT_UPDATE = true;
+        cout<<444444444<<endl;
 //        is_per_used = false;
-        for(auto &s:PERSON_HIS){
+        KCF_person = PERSON_HIS;
+        KCF_MUT.unlock();
+        for(auto &s:KCF_person){
             tracker.update_by_kcf(s.get_id(),s.located);
         }
-        KCF_MUT.unlock();
-
     }
 
 //ImgClient client(0);
@@ -111,17 +115,25 @@ mutex KCF_MUT;
         update = SORT_UPDATE;
         if(SORT_UPDATE) {
             temp_person = SORT_PERSON;
-            sort_img = SORT_IMG;
+            sort_img = SORT_IMG.clone();
             SORT_UPDATE = false;
-            person_his.clear();
-            track_person.clear();
         }
         KCF_MUT.unlock();
-        for(auto &s:temp_person){
-            if(s.get_tracked()) track_person.push_back(&s);
-            person_his.emplace_back(s.get_id());
+        if(update){
+            cout<<11111111<<endl;
+            person_his.clear();
+            track_person.clear();
+            for(auto &s:temp_person){
+                if(s.get_tracked()) track_person.push_back(&s);
+                person_his.emplace_back(s.get_id());
+            }
+        }else{
+            cout<<2222222<<endl;
         }
-        if(track_person.empty()) continue;
+
+        if(track_person.empty()) {
+            continue;
+        }
         if(update){
             tracker.InitKCF(sort_img, track_person);
         }
@@ -144,14 +156,19 @@ mutex KCF_MUT;
             i++;
         }
         KCF_MUT.lock();
-        SORT_PERSON = temp_person;
         PERSON_HIS = person_his;
-        PERSON_USED = false;
         KCF_MUT.unlock();
+        PER_MUT.lock();
+        PERSON = temp_person;
+        PERSON_USED = false;
+        PER_MUT.unlock();
 
         DrawPred(src.get_cv_color(),temp_person);
         ser.Public(src.get_cv_color());
-        imshow("DL",src.get_cv_color());
+//        imshow("DL",src.get_cv_color());
+        DrawPred(sort_img, temp_person);
+
+        imshow("111",sort_img);
         waitKey(1);
     }
 

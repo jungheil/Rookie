@@ -13,8 +13,8 @@ Ximg& Ximg::operator=(Ximg &ximg){
     rs_intrinsics_ = ximg.rs_intrinsics_;
     is_used_ = ximg.is_used_;
     header_ = ximg.header_;
-    cv_color_ = ximg.cv_color_;
-    cv_depth_ = ximg.cv_depth_;
+    cv_color_ = ximg.cv_color_.clone();
+    cv_depth_ = ximg.cv_depth_.clone();
     rs_depth_ = ximg.rs_depth_;
     ximg.is_used_ = true;
     return *this;
@@ -25,8 +25,8 @@ Ximg& Ximg::operator=(const Ximg &ximg){
     rs_intrinsics_ = ximg.rs_intrinsics_;
     is_used_ = ximg.is_used_;
     header_ = ximg.header_;
-    cv_color_ = ximg.cv_color_;
-    cv_depth_ = ximg.cv_depth_;
+    cv_color_ = ximg.cv_color_.clone();
+    cv_depth_ = ximg.cv_depth_.clone();
     rs_depth_ = ximg.rs_depth_;
     return *this;
 }
