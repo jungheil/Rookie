@@ -11,7 +11,7 @@ public:
     void Update(Ximg &img, std::vector<Person*> &person);
 
 private:
-    float detect_thresh_ = 0.5f;
+    float detect_thresh_ = 0.9f;
     cv::TrackerKCF::Params params_;
     std::vector<cv::Ptr<cv::Tracker>> trackers_;
     cv::Mat R_b_cam;
