@@ -57,7 +57,7 @@ mutex KCF_MUT;
     sleep(1);
     std::vector<Person> temp_person;
     std::vector<PersonHistory> KCF_person;
-
+    ImgService ser(1);
 
 
     while(true){
@@ -73,18 +73,28 @@ mutex KCF_MUT;
         if(!temp_person.empty()){
             tracker.Update(temp_person);
         }
-        KCF_MUT.lock();
-        SORT_PERSON.clear();
-        SORT_PERSON = temp_person;
-        SORT_IMG = img->get_cv_color().clone();
-        SORT_UPDATE = true;
-        cout<<444444444<<endl;
-//        is_per_used = false;
-        KCF_person = PERSON_HIS;
-        KCF_MUT.unlock();
-        for(auto &s:KCF_person){
-            tracker.update_by_kcf(s.get_id(),s.located);
-        }
+
+        PER_MUT.lock();
+        PERSON = temp_person;
+        PERSON_USED = false;
+        PER_MUT.unlock();
+        tracker.draw_person(src.get_cv_color(),temp_person);
+        DrawPred(src.get_cv_color(),temp_person);
+        ser.Public(src.get_cv_color());
+//        imshow("DL",src.get_cv_color());
+//        waitKey(1);
+
+//        KCF_MUT.lock();
+//        SORT_PERSON.clear();
+//        SORT_PERSON = temp_person;
+//        img->get_cv_color().copyTo(SORT_IMG);
+//        SORT_UPDATE = true;
+////        is_per_used = false;
+//        KCF_person = PERSON_HIS;
+//        KCF_MUT.unlock();
+//        for(auto &s:KCF_person){
+//            tracker.update_by_kcf(s.get_id(),s.located);
+//        }
     }
 
 //ImgClient client(0);
@@ -115,7 +125,7 @@ mutex KCF_MUT;
         update = SORT_UPDATE;
         if(SORT_UPDATE) {
             temp_person = SORT_PERSON;
-            sort_img = SORT_IMG.clone();
+            SORT_IMG.copyTo(sort_img);
             SORT_UPDATE = false;
         }
         KCF_MUT.unlock();
@@ -203,12 +213,12 @@ int main(int argc, char * argv[])
     CarController cctrl;
     thread t1(CameraThread, &cam, &img);
     thread t2(ProcessThread, &img);
-    thread t3(KCFThread, &img);
+//    thread t3(KCFThread, &img);
     thread t4(ControlThread, &cctrl);
 
     t1.join();
     t2.join();
-    t3.join();
+//    t3.join();
     t4.join();
 
 //    while(true){
