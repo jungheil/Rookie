@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 #include "common.h"
+#include "ImgFeature.h"
 using namespace cv;
 using namespace std;
 
@@ -20,6 +21,8 @@ public:
     size_t skipped_frames;
     Point2f prediction;
     TKalmanFilter* KF;
+    HOGSimilarity hog;//hogs描述子
+    CLFeature hs;//hs描述子
     CTrack(Point2f p, float dt, float Accel_noise_mag);
     ~CTrack();
 };

@@ -100,12 +100,14 @@ public:
     bool get_kcf_tracked(){return kcf_tracked_;};
     void set_box(cv::Rect box){box_ = box;};
     void Update(float distance, const cv::Point3f &located, const cv::Rect &box);
-
+    void set_mat(cv::Mat &hog){hog_mat=hog;};
+    cv::Mat get_mat(void){return hog_mat;};
 private:
     cv::Point3f located_;
     cv::Rect box_;
     cv::Point2f box_center_;
     cv::Point2f locater_x_z;
+    cv::Mat hog_mat;
     int width_;
     float distance_;
     int id_ = -1;

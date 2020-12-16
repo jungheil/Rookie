@@ -62,6 +62,8 @@ void CTracker::Update(std::vector<Person> &person)
         {
             CTrack* tr=new CTrack(person[i].get_located_xz(),dt,Accel_noise_mag);
             tr->descriptors = person[i].descriptors;
+            tr->hog.Init(person[i].get_mat());//更新hog
+            tr->hs.Init(person[i].get_mat());//更新hs
             tracks.push_back(tr);
         }
     }
@@ -71,6 +73,9 @@ void CTracker::Update(std::vector<Person> &person)
 
     // Matrix distance from track N-th to point detected M-th
     vector< vector<double> > Cost(N,vector<double>(M));
+    vector< vector<double> > HOG(N,vector<double>(M));
+    vector< vector<double> > HS(N,vector<double>(M));
+
     vector<int> assignment; // matrix used to determine N-th track will be join with point detected M-th based on Hungarian algorithm
 
     // matrix distance
@@ -83,7 +88,24 @@ void CTracker::Update(std::vector<Person> &person)
             //euclid distance
             dist=sqrtf(diff.x*diff.x+diff.y*diff.y);
             Cost[i][j]=dist;
+            HOG[i][j]=tracks[i]->hog.GetSimilarity(person[j].get_mat());
+            HS[i][j]=tracks[i]->hs.GetSimilarity(person[j].get_mat());
         }
+    }
+//    cout<<"HOG"<<"\n";
+//    for(const auto &s:HOG){
+//        for(const auto &i:s){
+//            cout<<i<<" ";
+//        }
+//        cout<<endl;
+//    }
+//    cout<<endl;
+    cout<<"HS"<<"\n";
+    for(const auto &s:HS){
+        for(const auto &i:s){
+            cout<<i<<" ";
+        }
+        cout<<endl;
     }
     // -----------------------------------
     // Solving assignment problem (tracks and predictions of Kalman filter)
@@ -177,6 +199,8 @@ void CTracker::Update(std::vector<Person> &person)
             tracks[i]->prediction=tracks[i]->KF->Update(person[assignment[i]].get_located_xz(), 1);
             person[assignment[i]].set_id(i);
             person[assignment[i]].set_tracked(true);
+            tracks[i]->hog.Update(person[assignment[i]].get_mat());
+            tracks[i]->hog.Update(person[assignment[i]].get_mat());
         }
         else				  // if not continue using predictions
         {

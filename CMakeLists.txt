@@ -15,8 +15,8 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src SRCS)
 list(REMOVE_ITEM SRCS ${PROJECT_SOURCE_DIR}/src/pyshare.cpp)
 message(${SRCS})
-add_executable(Rookie ${SRCS})
-add_library(pyshare SHARED src/pyshare.cpp src/proshare.cpp)
+add_executable(Rookie ${SRCS} src/ImgFeature.cpp)
+add_library(pyshare SHARED src/pyshare.cpp src/proshare.cpp include/ImgFeature.h)
 
 target_link_libraries(Rookie
         -pthread

@@ -269,18 +269,20 @@ namespace XRDetector{
             for(int i =0;i<person.size();i++){
                 Mat map = img.get_cv_color();
                 Mat obj = map(person[i].get_box());
-                resize(obj,obj,cv::Size(128, 128), CV_8UC1);//调整样本大小
+                resize(obj,obj,cv::Size(128, 256), CV_8UC1);//调整样本大小
 //            imshow("debug",obj);
-                person[i].compute_hog_feature(obj);
+//                person[i].compute_hog_feature(obj);
+                person[i].set_mat(obj);
             }
-            if(person.size()>1){
-                double dis=0;
-                for (int j = 0; j < person[0].descriptors.size(); j++)
-                {
-                    dis += pow(person[0].descriptors[j]-person[1].descriptors[j], 2);
-                }
-                cout<<"0和1"<<"相似度"<<dis<<"\n";
-            }
+
+//            if(person.size()>1){
+//                double dis=0;
+//                for (int j = 0; j < person[0].descriptors.size(); j++)
+//                {
+//                    dis += pow(person[0].descriptors[j]-person[1].descriptors[j], 2);
+//                }
+//                cout<<"0和1"<<"相似度"<<dis<<"\n";
+//            }
         }
         std::vector<cv::Rect>().swap(boxes);
     }

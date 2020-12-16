@@ -81,8 +81,8 @@ mutex KCF_MUT;
         tracker.draw_person(src.get_cv_color(),temp_person);
         DrawPred(src.get_cv_color(),temp_person);
         ser.Public(src.get_cv_color());
-//        imshow("DL",src.get_cv_color());
-//        waitKey(1);
+        imshow("DL",src.get_cv_color());
+        waitKey(1);
 
 //        KCF_MUT.lock();
 //        SORT_PERSON.clear();
