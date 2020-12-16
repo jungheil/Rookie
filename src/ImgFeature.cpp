@@ -339,7 +339,7 @@ float CLFeature::GetSimilarity(const Mat &img) {
 
     for(int i = 0; i<filter_a_.size();i++){
 //        if(abs(filter_a[i]*filter_a_[i])<100&&abs(filter_b[i]*filter_b_[i])<100) continue;
-        out += filter_a[i]*filter_a_[i]*filter_b[i]*filter_b_[i];
+        out += pow(filter_a[i]-filter_a_[i],2)+pow(filter_b[i]-filter_b_[i],2);
     }
 
     return out;
@@ -379,6 +379,112 @@ void CLFeature::Update(const Mat &img) {
         filter_a_[i] = learning_rate*(filter_a[i]) + (1 - learning_rate)*filter_a_[i];
         filter_b_[i] = learning_rate*(filter_b[i]) + (1 - learning_rate)*filter_b_[i];
         i++;
+    }
+}
+
+void HOGLoss::Init(cv::Mat img) {
+    vector<Mat> imgs;
+    vector<vector<double>> features;
+    vector<float> feature_temp;
+    vector<double> f2, f;
+
+    Crop(img,imgs);
+    feature_temp = hog_.Get(imgs[0]);
+    Normalize(feature_temp);
+    for(const auto &s:feature_temp){
+        f2.push_back(pow(s,2));
+        f.push_back(s);
+    }
+
+    for(auto it = imgs.begin()+1;it!=imgs.end();it++){
+        feature_temp = hog_.Get(*it);
+        Normalize(feature_temp);
+        for(int i = 0; i < feature_temp.size(); i++){
+            f2[i] += pow(feature_temp[i],2);
+            f[i] += feature_temp[i];
+        }
+    }
+
+//    for(int i = 0; i<f2.size();i++){
+//        filter_.push_back(f2[i]/(f[i]));
+//    }
+    fa_ = f;
+    fb_ = f2;
+
+}
+
+void HOGLoss::Normalize(std::vector<float> &feature) {
+    long double sum=0;
+    long double mean=0;
+    for(const auto &s: feature){
+        sum += s;
+    }
+    mean = sum / feature.size();
+    for(auto &s: feature){
+        s = s - mean;
+    }
+}
+
+void HOGLoss::Crop(const cv::Mat& img, std::vector<cv::Mat> &imgs) {
+    Mat src;
+    resize(img,src,img_size_);
+    Mat temp;
+    for(int i = 1; i<=8; i++){
+        for(int j = 1; j<=8; j++){
+            temp = src(Rect(i,j,img_size_.width-2*i,img_size_.height-2*j));
+            resize(temp,temp,img_size_);
+            imgs.push_back(temp);
+        }
+    }
+
+    copyMakeBorder( src, src, 8, 8, 8, 8, BORDER_REPLICATE);
+    for(int i = 1; i<=16; i++){
+        float angle = i * .2f;
+        Rotate(src,temp,angle);
+        temp = temp(Rect(8,8,img_size_.width,img_size_.height));
+//        resize(temp,temp,img_size_);
+        imgs.push_back(temp);
+        Rotate(src,temp,-angle);
+        temp = temp(Rect(8,8,img_size_.width,img_size_.height));
+//        resize(temp,temp,img_size_);
+        imgs.push_back(temp);
+    }
+}
+
+
+void HOGLoss::Rotate(const Mat &srcImage, Mat &destImage, double angle) {
+    Point2f center(srcImage.cols / 2, srcImage.rows / 2);//中心
+    Mat M = getRotationMatrix2D(center, angle, 1);//计算旋转的仿射变换矩阵
+    warpAffine(srcImage, destImage, M, Size(srcImage.cols, srcImage.rows));//仿射变换
+}
+
+
+double HOGLoss::GetLoss(cv::Mat img) {
+    vector<float> feature;
+    double out = 0;
+    double eps = 0.0000001;
+    Mat src;
+    feature = hog_.Get(img);
+    Normalize(feature);
+
+    for(int i = 0; i<feature.size();i++){
+        out += pow(feature[i]*fa_[i]/fb_[i]-1,2);
+//        out += pow(feature[i]-(filter_[i]),2);
+
+    }
+
+    return out;
+}
+
+void HOGLoss::Update(const cv::Mat& img) {
+    vector<float> feature;
+    feature = hog_.Get(img);
+    Normalize(feature);
+
+    for(int i = 0;i<filter_.size();i++){
+        float a = filter_[i];
+        fa_[i] = learning_rate*feature[i]+(1-learning_rate)*filter_[i];
+        fb_[i] = learning_rate*pow(feature[i],2)+(1-learning_rate)*fb_[i];
     }
 }
 

@@ -38,7 +38,6 @@ private:
     std::vector<float> filter_;
     float learning_rate = 0.25;
     cv::Size img_size_ = cv::Size(128,256);
-
 };
 
 
@@ -81,6 +80,32 @@ private:
     std::vector<double> filter_a_;
     std::vector<double> filter_b_;
 };
+
+
+class HOGLoss{
+public:
+    HOGLoss() = default;
+    void Init(cv::Mat img);
+    double GetLoss(cv::Mat img);
+    void Update(const cv::Mat& img);
+
+private:
+    void Normalize(std::vector<float> &feature);
+    void Crop(const cv::Mat& img, std::vector<cv::Mat> &imgs);
+    void Rotate(const cv::Mat &srcImage, cv::Mat &destImage, double angle);
+
+private:
+    ClcHog hog_;
+
+private:
+    std::vector<double> filter_;
+    std::vector<double> fa_;
+    std::vector<double> fb_;
+
+    double learning_rate = 0.25;
+    cv::Size img_size_ = cv::Size(128,256);
+};
+
 
 
 #endif //ROOKIE_IMGFEATURE_H

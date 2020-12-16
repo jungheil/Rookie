@@ -88,7 +88,7 @@ void CTracker::Update(std::vector<Person> &person)
             //euclid distance
             dist=sqrtf(diff.x*diff.x+diff.y*diff.y);
             Cost[i][j]=dist;
-            HOG[i][j]=tracks[i]->hog.GetSimilarity(person[j].get_mat());
+            HOG[i][j]=tracks[i]->hog.GetLoss(person[j].get_mat());
             HS[i][j]=tracks[i]->hs.GetSimilarity(person[j].get_mat());
         }
     }
@@ -172,6 +172,9 @@ void CTracker::Update(std::vector<Person> &person)
         for(int i=0;i<not_assigned_detections.size();i++)
         {
             CTrack* tr=new CTrack(person[not_assigned_detections[i]].get_located_xz(),dt,Accel_noise_mag);
+            tr->descriptors = person[i].descriptors;
+            tr->hog.Init(person[i].get_mat());//更新hog
+            tr->hs.Init(person[i].get_mat());//更新hs
             tracks.push_back(tr);
         }
     }
