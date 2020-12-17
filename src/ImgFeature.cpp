@@ -262,17 +262,31 @@ void CLFeature::Init(const Mat &img) {
     for(auto &s:filter_b){
         s /= imgs.size();
     }
-    double s2a;
-    double s2b;
+
+//    double s2a;
+//    double s2b;
+//    for(int i = 0; i<filter_a.size(); i++){
+//        s2a += pow(filter_a[i],2);
+//        s2b += pow(filter_b[i], 2);
+//    }
+//    for(auto &s:filter_a){
+//        s = s / (s2a/filter_a.size());
+//    }
+//    for(auto &s:filter_b){
+//        s = s / (s2b/filter_b.size());
+//    }
+
+    // 最大值归一化
+    int max = 0;
     for(int i = 0; i<filter_a.size(); i++){
-        s2a += pow(filter_a[i],2);
-        s2b += pow(filter_b[i], 2);
+        if(abs(filter_a[i])>max) max = abs(filter_a[i]);
+        if(abs(filter_b[i])>max) max = abs(filter_b[i]);
     }
     for(auto &s:filter_a){
-        s = s / (s2a/filter_a.size());
+        s = s / max;
     }
     for(auto &s:filter_b){
-        s = s / (s2b/filter_b.size());
+        s = s / max;
     }
 
     filter_a_ = filter_a;
@@ -324,17 +338,30 @@ float CLFeature::GetSimilarity(const Mat &img) {
         filter_b.push_back((*it)[2]-128);
     }
 
-    double s2a;
-    double s2b;
+//    double s2a;
+//    double s2b;
+//    for(int i = 0; i<filter_a.size(); i++){
+//        s2a += pow(filter_a[i],2);
+//        s2b += pow(filter_b[i], 2);
+//    }
+//    for(auto &s:filter_a){
+//        s = s / (s2a/filter_a.size());
+//    }
+//    for(auto &s:filter_b){
+//        s = s / (s2b/filter_b.size());
+//    }
+
+    // 最大值归一化
+    int max = 0;
     for(int i = 0; i<filter_a.size(); i++){
-        s2a += pow(filter_a[i],2);
-        s2b += pow(filter_b[i], 2);
+        if(abs(filter_a[i])>max) max = abs(filter_a[i]);
+        if(abs(filter_b[i])>max) max = abs(filter_b[i]);
     }
     for(auto &s:filter_a){
-        s = s / (s2a/filter_a.size());
+        s = s / max;
     }
     for(auto &s:filter_b){
-        s = s / (s2b/filter_b.size());
+        s = s / max;
     }
 
     for(int i = 0; i<filter_a_.size();i++){
@@ -358,17 +385,30 @@ void CLFeature::Update(const Mat &img) {
         filter_b.push_back((*it)[2]-128);
     }
 
-    double s2a;
-    double s2b;
+//    double s2a;
+//    double s2b;
+//    for(int i = 0; i<filter_a.size(); i++){
+//        s2a += pow(filter_a[i],2);
+//        s2b += pow(filter_b[i], 2);
+//    }
+//    for(auto &s:filter_a){
+//        s = s / (s2a/filter_a.size());
+//    }
+//    for(auto &s:filter_b){
+//        s = s / (s2b/filter_b.size());
+//    }
+
+    // 最大值归一化
+    int max = 0;
     for(int i = 0; i<filter_a.size(); i++){
-        s2a += pow(filter_a[i],2);
-        s2b += pow(filter_b[i], 2);
+        if(abs(filter_a[i])>max) max = abs(filter_a[i]);
+        if(abs(filter_b[i])>max) max = abs(filter_b[i]);
     }
     for(auto &s:filter_a){
-        s = s / (s2a/filter_a.size());
+        s = s / max;
     }
     for(auto &s:filter_b){
-        s = s / (s2b/filter_b.size());
+        s = s / max;
     }
 
     int i = 0;
