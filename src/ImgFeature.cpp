@@ -508,8 +508,8 @@ double HOGLoss::GetLoss(cv::Mat img) {
     Normalize(feature);
 
     for(int i = 0; i<feature.size();i++){
-        out += pow(feature[i]*fa_[i]/fb_[i]-1,2);
-//        out += pow(feature[i]-(filter_[i]),2);
+//        out += pow(feature[i]*fa_[i]/fb_[i]-1,2);
+        out += pow(feature[i]-(filter_[i]),2);
 
     }
 

@@ -55,8 +55,7 @@ void CTracker::Update(std::vector<Person> &person)
     // -----------------------------------
     // If there is no tracks yet, then every point begins its own track.
     // -----------------------------------
-    if(tracks.size()==0)
-    {
+    if(tracks.size()==0){
         // If no tracks yet
         for(int i=0;i<person.size();i++)
         {
@@ -67,7 +66,6 @@ void CTracker::Update(std::vector<Person> &person)
             tracks.push_back(tr);
         }
     }
-
     int N=tracks.size();		// the number of tracks
     int M=person.size();	// the number of points detected
 
@@ -100,13 +98,53 @@ void CTracker::Update(std::vector<Person> &person)
         cout<<endl;
     }
     cout<<endl;
-//    cout<<"HS"<<"\n";
-//    for(const auto &s:HS){
-//        for(const auto &i:s){
-//            cout<<i<<" ";
-//        }
-//        cout<<endl;
-//    }
+    cout<<"HS"<<"\n";
+    for(const auto &s:HS){
+        for(const auto &i:s){
+            cout<<i<<" ";
+        }
+        cout<<endl;
+    }
+    cout<<"cost"<<"\n";
+    for(const auto &s:Cost){
+        for(const auto &i:s){
+            cout<<i<<" ";
+        }
+        cout<<endl;
+    }
+    normal_size(HOG);
+    normal_size(HS);
+    normal_size(Cost);
+    cout<<"HOG_normal"<<"\n";
+    for(const auto &s:HOG){
+        for(const auto &i:s){
+            cout<<i<<" ";
+        }
+        cout<<endl;
+    }
+    cout<<"HS_normal"<<"\n";
+    for(const auto &s:HS){
+        for(const auto &i:s){
+            cout<<i<<" ";
+        }
+        cout<<endl;
+    }
+    cout<<"cost_normal"<<"\n";
+    for(const auto &s:Cost){
+        for(const auto &i:s){
+            cout<<i<<" ";
+        }
+        cout<<endl;
+    }
+
+    data_fusion(Cost,HS,HOG);
+    cout<<"data_fusion"<<"\n";
+    for(const auto &s:Cost){
+        for(const auto &i:s){
+            cout<<i<<" ";
+        }
+        cout<<endl;
+    }
     // -----------------------------------
     // Solving assignment problem (tracks and predictions of Kalman filter)
     // -----------------------------------
@@ -204,6 +242,9 @@ void CTracker::Update(std::vector<Person> &person)
             person[assignment[i]].set_tracked(true);
             tracks[i]->hog.Update(person[assignment[i]].get_mat());
             tracks[i]->hog.Update(person[assignment[i]].get_mat());
+
+            tracks[i]->hs.Update(person[assignment[i]].get_mat());
+            cout<<i<<"track"<<assignment[i]<<"detect匹配"<<"\n";
         }
         else				  // if not continue using predictions
         {

@@ -241,3 +241,37 @@ bool RectSafety(cv::Rect2d &brect, int cols, int rows) {
     brect=brect&out_rect;
     return brect.area()!=0;
 }
+void normal_size(std::vector<std::vector<double>> &data ){
+    if(data.size()==1){
+        return;
+    }
+    double max_data=0;
+    double min_data=0;
+    for(const auto &s:data){
+        for(const auto &i:s){
+            if(i>max_data){
+                max_data =i;
+            }
+            if(i<min_data){
+                min_data =i;
+            }
+        }
+    }
+    for( auto &s:data){
+        for( auto &i:s){
+            i=(i-min_data)/(max_data-min_data);
+        }
+    }
+
+}
+void data_fusion(std::vector<std::vector<double>> &cost,std::vector<std::vector<double>> &hs,std::vector<std::vector<double>> &hog){
+    if(cost.empty()){
+        return;
+    }
+    for(int i = 0; i< cost.size();i++){
+        for(int j = 0; j<cost[0].size(); j++){
+            cost[i][j] = cost[i][j]+hs[i][j]+hog[i][j];
+        }
+    }
+}
+

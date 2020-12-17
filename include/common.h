@@ -167,8 +167,8 @@ void GetMask(Ximg img, cv::Rect box, cv::Mat& out);
 
 bool RectSafety(cv::Rect2d &brect, int cols, int rows);
 
+void normal_size(std::vector<std::vector<double>> &data );
 
-
-
+void data_fusion(std::vector<std::vector<double>> &cost,std::vector<std::vector<double>> &hs,std::vector<std::vector<double>> &hog);
 
 #endif //XIROBO_COMMON_H
