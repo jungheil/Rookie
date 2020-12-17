@@ -445,9 +445,9 @@ void HOGLoss::Init(cv::Mat img) {
         }
     }
 
-//    for(int i = 0; i<f2.size();i++){
-//        filter_.push_back(f2[i]/(f[i]));
-//    }
+    for(int i = 0; i<f2.size();i++){
+        filter_.push_back(f2[i]/(f[i]));
+    }
     fa_ = f;
     fb_ = f2;
 
@@ -522,8 +522,8 @@ void HOGLoss::Update(const cv::Mat& img) {
     Normalize(feature);
 
     for(int i = 0;i<filter_.size();i++){
-        float a = filter_[i];
-        fa_[i] = learning_rate*feature[i]+(1-learning_rate)*filter_[i];
+        filter_[i] = learning_rate*feature[i]+(1-learning_rate)*filter_[i];;
+        fa_[i] = learning_rate*feature[i]+(1-learning_rate)*fa_[i];
         fb_[i] = learning_rate*pow(feature[i],2)+(1-learning_rate)*fb_[i];
     }
 }

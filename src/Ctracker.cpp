@@ -92,21 +92,21 @@ void CTracker::Update(std::vector<Person> &person)
             HS[i][j]=tracks[i]->hs.GetSimilarity(person[j].get_mat());
         }
     }
-//    cout<<"HOG"<<"\n";
-//    for(const auto &s:HOG){
-//        for(const auto &i:s){
-//            cout<<i<<" ";
-//        }
-//        cout<<endl;
-//    }
-//    cout<<endl;
-    cout<<"HS"<<"\n";
-    for(const auto &s:HS){
+    cout<<"HOG"<<"\n";
+    for(const auto &s:HOG){
         for(const auto &i:s){
             cout<<i<<" ";
         }
         cout<<endl;
     }
+    cout<<endl;
+//    cout<<"HS"<<"\n";
+//    for(const auto &s:HS){
+//        for(const auto &i:s){
+//            cout<<i<<" ";
+//        }
+//        cout<<endl;
+//    }
     // -----------------------------------
     // Solving assignment problem (tracks and predictions of Kalman filter)
     // -----------------------------------
