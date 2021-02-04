@@ -188,12 +188,16 @@ mutex KCF_MUT;
 [[noreturn]] void ControlThread(CarController *cctrl){
     Motion3D motion(cctrl);
     ProService<int> tar_service(2);
-    int temp_tar = -1;
-    tar_service.Public(&temp_tar);
-    ProClient<int> tar_client(2);
+    ProService<bool> run_service(3);
     int target = -1;
+    bool is_run = true;
+    tar_service.Public(&target);
+    run_service.Public(&is_run);
+    ProClient<int> tar_client(2);
+    ProClient<bool> run_client(3);
     while (true){
         tar_client.Subscribe(target);
+        run_client.Subscribe(is_run);
         motion.set_target(target);
         if(!PERSON_USED){
             PER_MUT.lock();
@@ -201,7 +205,7 @@ mutex KCF_MUT;
             PERSON_USED = true;
             PER_MUT.unlock();
         }
-        motion.Move();
+        motion.Move(!is_run);
     }
 }
 

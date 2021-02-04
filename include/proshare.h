@@ -90,6 +90,9 @@ public:
 template class ProClient<int>;
 template class ProService<int>;
 
+template class ProClient<bool>;
+template class ProService<bool>;
+
 
 
 

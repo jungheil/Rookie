@@ -8,6 +8,7 @@ extern "C"{
 ProClient<ImageStr> img_client(1);
 ImageStr *imgstr = new ImageStr ;
 int target = -1;
+bool run = true;
 
 //ImageStr* PSubscribe_(){
 //    ImageStr *imgstr = new ImageStr ;
@@ -42,6 +43,14 @@ ProService<int> tar_service(2);
 bool PTar_Public(int tar){
     target = tar;
     tar_service.Public(&target);
+}
+
+ProService<bool> run_service(3);
+
+bool PRun_Public(bool r){
+    run = r;
+    printf("%d\n",run);
+    run_service.Public(&run);
 }
 
 }

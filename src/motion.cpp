@@ -64,11 +64,13 @@ Person* Motion::FindPerson() {
     return nullptr;
 }
 
-void Motion3D::Move() {
+void Motion3D::Move(bool stop) {
     tp_ = FindPerson();
     lost_target_ = tp_ == nullptr;
 
-    if(lost_target_){
+    if(stop){
+        controller_->Move(CarController::CARCONTROL_LINEAR_ZERO,128,CarController::CARCONTROL_ANGULAR_ZERO,128);
+    }else if(lost_target_){
         if(loss_delay_++ > 100){
             controller_->Move(CarController::CARCONTROL_LINEAR_ZERO,128,CarController::CARCONTROL_ANGULAR_ZERO,128);
         }

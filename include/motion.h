@@ -31,7 +31,7 @@ public:
     explicit Motion(CarController *controller):controller_(controller){};
     inline void set_target(int id){target_id_ = id;};
     void UpdatePerson(std::vector<Person> person){person_ = person; is_control_ = false;};
-    virtual void Move() = 0;
+    virtual void Move(bool stop) = 0;
 
 protected:
     Person* FindPerson();
@@ -50,7 +50,7 @@ protected:
 class Motion3D:public Motion{
 public:
     Motion3D(CarController *controller):Motion(controller){};
-    void Move() override;
+    void Move(bool stop) override;
 
 
 };

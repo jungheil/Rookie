@@ -1,15 +1,60 @@
 <html>
   <head>
     <title>People Tracking System</title>
+    <style>
+      body {
+        text-align: center;
+      }
+      #container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content:center;
+      }
+      #container > div {
+        margin: 10px;
+        padding: 10px;
+      }
+    </style>
+    <script>
+      function run_color(){
+        if (document.querySelector('#run_status').value == 'Stop'){
+          document.querySelector('#run_status').style.color = 'red';
+        }else{
+          document.querySelector('#run_status').style.color = 'green';
+        }
+      }
+      function check_id(){
+        let id = document.querySelector('#track_id').value;
+        if(id === "" || id ==null || isNaN(id)){
+          alert("NaN!");
+          return false;
+　　    }else{ 
+　　　　   return true; 
+　　    } 
+      }
+      window.onload = run_color;
+    </script>
   </head>
   <body>
     <h1>People Tracking System</h1>
-    <img src="{{ url_for('video_feed') }}">
-    <form method="POST">
-        <br>Input the index of the person you want:<br>
-        <input type="text "name="index" value="0">
-        <input type="submit" value="Submit">
-    </form>
+    <img src="{{ url_for('video_feed') }}"></br>
+    <div id="container">
+      <div>
+        <form method="post" onsubmit="return check_id()" accept-charset="utf-8">
+          Input the index of the person you want:</br>
+          <input type="text "name="index" value="{{ track_id }}", id="track_id">
+          <input type="submit" value="Submit" id="post_id">
+        </form>
+        <form action="/run_status" method="post" accept-charset="utf-8">
+            <input type="submit" value="{{ bt_status }}" id="run_status">
+        </form>
+      </div>
+      <div>
+        <ul>
+            <li>Tracking ID: {{ track_id }}</li>
+        </ul>
+      </div>
+    </div>
   </body>
 </html>
 
