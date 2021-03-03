@@ -45,6 +45,14 @@ bool PTar_Public(int tar){
     tar_service.Public(&target);
 }
 
+ProClient<int> tar_client(2);
+
+int PTar_Subscribe(){
+    int out;
+    tar_client.Subscribe(out);
+    return out;
+}
+
 ProService<bool> run_service(3);
 
 bool PRun_Public(bool r){

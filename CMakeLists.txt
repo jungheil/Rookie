@@ -8,6 +8,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 set(CMAKE_PREFIX_PATH ~/install/pytorch/torch/)
 find_package(Torch REQUIRED)
 find_package(OpenCV 4 REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_search_module(ZBAR REQUIRED zbar)
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -23,6 +25,7 @@ target_link_libraries(Rookie
         ${OpenCV_LIBS}
         ${TORCH_LIBRARIES}
         realsense2
+        ${ZBAR_LIBRARIES}
         )
 
 target_link_libraries(pyshare

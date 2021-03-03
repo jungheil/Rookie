@@ -25,6 +25,7 @@ public:
     ProTrans(char index):
             is_init_(true),
             index_(index){};
+
 protected:
     virtual void MutexInit() = 0;
     virtual void BufInit() = 0;
@@ -36,7 +37,8 @@ protected:
     char PATHNAME_[10] = "/dev/null";
     int mutex_;
     int shm_id_;
-    T *buffer_;
+    void *buffer_;
+    time_t time_;
     struct sembuf sem_lock{0,-1,SEM_UNDO};
     struct sembuf sem_unlock{0,1,SEM_UNDO};
 };
@@ -47,7 +49,7 @@ public:
     ProService() = default;
     ProService(unsigned char index);
     ~ProService();
-    bool Public(const T *data);
+    bool Public(const T *data, bool change_time = true);
 
 private:
     void MutexInit();
@@ -62,6 +64,7 @@ public:
     ~ProClient() = default;
 
     bool Subscribe(T &output);
+    bool Subscribe(T &output, time_t &time);
 private:
     void MutexInit();
     void BufInit();

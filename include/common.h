@@ -8,6 +8,8 @@
 #include <opencv2/opencv.hpp>
 #include <librealsense2/rsutil.h>
 #include <librealsense2/rs.hpp> // Include RealSense Cross Platform API
+#include <zbar.h>
+
 
 
 class Header{
@@ -170,5 +172,22 @@ bool RectSafety(cv::Rect2d &brect, int cols, int rows);
 void normal_size(std::vector<std::vector<double>> &data );
 
 void data_fusion(std::vector<std::vector<double>> &cost,std::vector<std::vector<double>> &hs,std::vector<std::vector<double>> &hog);
+
+
+typedef struct
+{
+    std::string data;
+    std::vector <cv::Point> location;
+    cv::Point center;
+} QRCode;
+
+class ZQRCodeDetector{
+public:
+    ZQRCodeDetector();
+    bool Get(cv::Mat &src, std::vector<QRCode>& objs);
+
+private:
+    zbar::ImageScanner scanner_;
+};
 
 #endif //XIROBO_COMMON_H

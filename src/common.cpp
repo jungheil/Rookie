@@ -64,20 +64,31 @@ void DrawPred(cv::Mat &src, std::vector<Person> person)
         int right = person[i].get_box().x+person[i].get_box().width;
         int bottom = person[i].get_box().y+person[i].get_box().height;
         //Draw a rectangle displaying the bounding box
-        cv::circle(src, cv::Point(x, y),2, cv::Scalar(255,0,0),-1);
-        cv::rectangle(src, cv::Point(left, top), cv::Point(right, bottom), cv::Scalar(255, 255, 0), 3);
+        cv::circle(src, cv::Point(x, y),3, cv::Scalar(159, 237, 123),-1);
+        cv::rectangle(src, cv::Point(left, top), cv::Point(right, bottom), cv::Scalar(159, 237, 123), 2);
         //Get the label for the class name and its confidence
-        std::stringstream strStream;
-        strStream<<person[i].get_located();
-        std::string label = strStream.str();
-        putText(src, label, cv::Point(x, y), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0,255,0),1);
+        std::stringstream ss;
+        int baseline;
+
         std::string temp_id = "";
         temp_id +=std::to_string(person[i].get_id());
         cv::Point temp_point = cv::Point(left, top);
         temp_point.y +=5;
         //行人检测时左上角标号绘制
-        putText(src, temp_id, temp_point, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0,255,0),1);
 
+        ss<<"ID: "<<temp_id;
+        std::string id_text = ss.str();
+        cv::Size id_size = cv::getTextSize(id_text, FONT_HERSHEY_PLAIN, 1, 2,&baseline);
+        rectangle(src,Rect(person[i].get_box().x+2,person[i].get_box().y+2,id_size.width+20,id_size.height+10),cv::Scalar(87,71,255),-1);
+        putText(src, id_text, cv::Point(person[i].get_box().x+12, person[i].get_box().y+id_size.height+7), cv::FONT_HERSHEY_PLAIN , 1, cv::Scalar(255,255,255),2);
+
+        ss.str("");
+        ss<<setiosflags(ios::fixed)<<setprecision(2);
+        ss<<"Located: ("<<person[i].get_located().x<<", "<<person[i].get_located().y<<", "<<person[i].get_located().z<<")";
+        std::string located_text = ss.str();
+        cv::Size located_size = cv::getTextSize(located_text, FONT_HERSHEY_PLAIN, 1, 2,&baseline);
+        rectangle(src,Rect(person[i].get_box().x+2,person[i].get_box().y+located_size.height+12,located_size.width+20,located_size.height+10),cv::Scalar(2, 165, 255),-1);
+        putText(src, located_text, cv::Point(person[i].get_box().x+12, person[i].get_box().y+id_size.height+located_size.height+17), cv::FONT_HERSHEY_PLAIN , 1, cv::Scalar(255,255,255),2);
     }
 }
 
@@ -275,3 +286,46 @@ void data_fusion(std::vector<std::vector<double>> &cost,std::vector<std::vector<
     }
 }
 
+ZQRCodeDetector::ZQRCodeDetector() {
+    using namespace zbar;
+    scanner_.set_config(ZBAR_QRCODE, ZBAR_CFG_ENABLE, 1);
+}
+
+bool ZQRCodeDetector::Get(Mat &src, vector<QRCode> &objs) {
+    using namespace zbar;
+
+    objs.clear();
+
+    // Convert image to grayscale
+    Mat imGray;
+    cvtColor(src, imGray,COLOR_BGR2GRAY);
+    equalizeHist(imGray, imGray);
+
+    // Wrap image data in a zbar image
+    Image image(src.cols, src.rows, "Y800", (uchar *)imGray.data, src.cols * src.rows);
+
+    // Scan the image for barcodes and QRCodes
+    int n = scanner_.scan(image);
+
+    // Print results
+    for(Image::SymbolIterator symbol = image.symbol_begin(); symbol != image.symbol_end(); ++symbol)
+    {
+        QRCode obj;
+
+        obj.data = symbol->get_data();
+
+        // Obtain location
+        for(int i = 0; i< symbol->get_location_size(); i++)
+        {
+            obj.location.emplace_back(symbol->get_location_x(i),symbol->get_location_y(i));
+            obj.center.x += symbol->get_location_x(i);
+            obj.center.y += symbol->get_location_y(i);
+
+        }
+        obj.center.x /= symbol->get_location_size();
+        obj.center.y /= symbol->get_location_size();
+
+        objs.push_back(obj);
+    }
+    return n;
+}

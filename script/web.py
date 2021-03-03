@@ -16,7 +16,9 @@ def SubInit():
     lib.PImg_GetData.restype = ctypes.POINTER(ctypes.c_uint8)
 
     lib.PRun_Public.restype = ctypes.c_bool
-    lib.PTar_Public.restype = ctypes.c_int
+    lib.PTar_Public.restype = ctypes.c_bool
+    lib.PTar_Subscribe.restype = ctypes.c_int
+
     return lib
 
 def GetImg(lib):
@@ -72,6 +74,8 @@ def video_feed():
                     
 @app.route('/status')
 def status():
+    global TRACK_ID
+    TRACK_ID = lib.PTar_Subscribe()
     return render_template('status.html' ,\
                 track_id=TRACK_ID)
 

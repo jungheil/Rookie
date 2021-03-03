@@ -6,6 +6,7 @@
 #include <string.h>
 #include <sys/shm.h>
 #include <fcntl.h>
+#include "time.h"
 
 
 #include "proshare.h"
@@ -39,12 +40,12 @@ void ProService<T>::MutexInit() {
 template <class T>
 void ProService<T>::BufInit() {
     key_t key = ftok(this->PATHNAME_,0x66+this->index_*2);
-    this->shm_id_ = shmget(key, sizeof(T), IPC_CREAT|0666);
+    this->shm_id_ = shmget(key, sizeof(T)+sizeof(time_t), IPC_CREAT|0666);
     if (this->shm_id_ < 0){
         perror("[ImgBufInit] ser shmget failed.");
         exit(-1);
     }
-    this->buffer_ = (T*)shmat(this->shm_id_, NULL, 0);
+    this->buffer_ = (void*)shmat(this->shm_id_, NULL, 0);
     if ((long)this->buffer_ == -1){
         perror("[ImgBufInit] shmat failed.");
         exit(-1);
@@ -52,7 +53,7 @@ void ProService<T>::BufInit() {
 }
 
 template <class T>
-bool ProService<T>::Public(const T *data) {
+bool ProService<T>::Public(const T *data, bool change_time) {
 //    unsigned int img_size = width*height*3;
 //    if (img_size > IMG_MAX_SIZE) return false;
 //    unsigned char *data_temp = (unsigned char*)data;
@@ -63,8 +64,10 @@ bool ProService<T>::Public(const T *data) {
 //        image->data_[i] = *data_temp;
 //        data_temp++;
 //    }
+    this->time_ = time(0);
     semop(this->mutex_, &this->sem_lock, 1);
     memcpy(this->buffer_, data, sizeof(*data));
+    if(change_time) memcpy((T*)this->buffer_+1, &(this->time_), sizeof(time_t));
     semop(this->mutex_, &this->sem_unlock, 1);
     return true;
 }
@@ -99,7 +102,7 @@ void ProClient<T>::MutexInit() {
 template <class T>
 void ProClient<T>::BufInit() {
     key_t key = ftok(this->PATHNAME_,0x66+this->index_*2);
-    this->shm_id_ = shmget(key, sizeof(T), 0666);
+    this->shm_id_ = shmget(key, sizeof(T)+sizeof(time_t), 0666);
 
     if (this->shm_id_ < 0){
         perror("[ImgBufInit] cli shmget failed");
@@ -119,6 +122,16 @@ bool ProClient<T>::Subscribe(T &output) {
     semop(this->mutex_, &this->sem_unlock, 1);
     return true;
 }
+
+template <class T>
+bool ProClient<T>::Subscribe(T &output, time_t &time) {
+    semop(this->mutex_, &this->sem_lock, 1);
+    memcpy(&output, this->buffer_, sizeof(output));
+    memcpy(&time, (T*)this->buffer_+1, sizeof(time_t));
+    semop(this->mutex_, &this->sem_unlock, 1);
+    return true;
+}
+
 
 //bool ImgClient::Subscribe(cv::Mat &img) {
 //    ImageStr *imgstr = new ImageStr ;

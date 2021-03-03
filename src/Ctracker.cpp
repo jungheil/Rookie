@@ -90,61 +90,61 @@ void CTracker::Update(std::vector<Person> &person)
             HS[i][j]=tracks[i]->hs.GetSimilarity(person[j].get_mat());
         }
     }
-    cout<<"HOG"<<"\n";
-    for(const auto &s:HOG){
-        for(const auto &i:s){
-            cout<<i<<" ";
-        }
-        cout<<endl;
-    }
-    cout<<endl;
-    cout<<"HS"<<"\n";
-    for(const auto &s:HS){
-        for(const auto &i:s){
-            cout<<i<<" ";
-        }
-        cout<<endl;
-    }
-    cout<<"cost"<<"\n";
-    for(const auto &s:Cost){
-        for(const auto &i:s){
-            cout<<i<<" ";
-        }
-        cout<<endl;
-    }
+//    cout<<"HOG"<<"\n";
+//    for(const auto &s:HOG){
+//        for(const auto &i:s){
+//            cout<<i<<" ";
+//        }
+//        cout<<endl;
+//    }
+//    cout<<endl;
+//    cout<<"HS"<<"\n";
+//    for(const auto &s:HS){
+//        for(const auto &i:s){
+//            cout<<i<<" ";
+//        }
+//        cout<<endl;
+//    }
+//    cout<<"cost"<<"\n";
+//    for(const auto &s:Cost){
+//        for(const auto &i:s){
+//            cout<<i<<" ";
+//        }
+//        cout<<endl;
+//    }
     normal_size(HOG);
     normal_size(HS);
     normal_size(Cost);
-    cout<<"HOG_normal"<<"\n";
-    for(const auto &s:HOG){
-        for(const auto &i:s){
-            cout<<i<<" ";
-        }
-        cout<<endl;
-    }
-    cout<<"HS_normal"<<"\n";
-    for(const auto &s:HS){
-        for(const auto &i:s){
-            cout<<i<<" ";
-        }
-        cout<<endl;
-    }
-    cout<<"cost_normal"<<"\n";
-    for(const auto &s:Cost){
-        for(const auto &i:s){
-            cout<<i<<" ";
-        }
-        cout<<endl;
-    }
+//    cout<<"HOG_normal"<<"\n";
+//    for(const auto &s:HOG){
+//        for(const auto &i:s){
+//            cout<<i<<" ";
+//        }
+//        cout<<endl;
+//    }
+//    cout<<"HS_normal"<<"\n";
+//    for(const auto &s:HS){
+//        for(const auto &i:s){
+//            cout<<i<<" ";
+//        }
+//        cout<<endl;
+//    }
+//    cout<<"cost_normal"<<"\n";
+//    for(const auto &s:Cost){
+//        for(const auto &i:s){
+//            cout<<i<<" ";
+//        }
+//        cout<<endl;
+//    }
 
     data_fusion(Cost,HS,HOG);
-    cout<<"data_fusion"<<"\n";
-    for(const auto &s:Cost){
-        for(const auto &i:s){
-            cout<<i<<" ";
-        }
-        cout<<endl;
-    }
+//    cout<<"data_fusion"<<"\n";
+//    for(const auto &s:Cost){
+//        for(const auto &i:s){
+//            cout<<i<<" ";
+//        }
+//        cout<<endl;
+//    }
     // -----------------------------------
     // Solving assignment problem (tracks and predictions of Kalman filter)
     // -----------------------------------
@@ -294,15 +294,15 @@ void CTracker::draw_person(cv::Mat &src, std::vector<Person> &person){
             }
         }
     }
-    for(int i =0;i<person.size();i++){
-        string str = to_string(person[i].get_id());
-        cv::putText(src, // 图像矩阵
-                    str,                  // string型文字内容
-                    person[i].get_box_center(),           // 文字坐标，以左下角为原点
-                    cv::FONT_HERSHEY_SIMPLEX,   // 字体类型
-                    5, // 字体大小
-                    cv::Scalar(255, 255, 255));
-    }
+//    for(int i =0;i<person.size();i++){
+//        string str = to_string(person[i].get_id());
+//        cv::putText(src, // 图像矩阵
+//                    str,                  // string型文字内容
+//                    person[i].get_box_center(),           // 文字坐标，以左下角为原点
+//                    cv::FONT_HERSHEY_SIMPLEX,   // 字体类型
+//                    5, // 字体大小
+//                    cv::Scalar(255, 255, 255));
+//    }
 }
 void CTracker::update_by_kcf(int num, std::vector<Point2f> &kcf_trace) {
     if(tracks.size()<num){

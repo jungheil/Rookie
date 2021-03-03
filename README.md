@@ -40,7 +40,15 @@
 
    安装步骤参照[这里](https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md)。
 
-4. 修改CmakeLists文件
+4. 安装Zbar
+
+   ```bash
+   sudo apt-get install libzbar-dev libzbar0
+   ```
+
+   
+
+5. 修改CmakeLists文件
 
    将下面一行修改成自己libtorch的目录：
 
@@ -48,7 +56,7 @@
    set(CMAKE_PREFIX_PATH ~/install/pytorch/torch/)
    ```
 
-5. 编译
+6. 编译
 
    ```bash
    mkdir build

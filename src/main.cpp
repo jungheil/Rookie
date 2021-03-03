@@ -17,18 +17,19 @@ using namespace cv;
 
 
 std::vector<Person> PERSON;
-std::vector<Person> SORT_PERSON;
-cv::Mat SORT_IMG;
+cv::Mat PER_IMG;
 bool SORT_UPDATE = false;
 std::vector<PersonHistory> PERSON_HIS;
 bool PERSON_USED = false;
 bool SORT_IMG_USED = true;
-bool KCF_IMG_USED = true;
+bool QR_IMG_USED = true;
+int QR_TAR = -2;
 
 
 mutex CAM_MUT;
 mutex PER_MUT;
 mutex KCF_MUT;
+mutex QR_MUT;
 
 
 [[noreturn]] void CameraThread(Camera *cam, Ximg *img){
@@ -45,7 +46,6 @@ mutex KCF_MUT;
             //mut.unlock();
 
             SORT_IMG_USED = false;
-            KCF_IMG_USED = false;
         }
     }
 }
@@ -56,7 +56,6 @@ mutex KCF_MUT;
     Ximg src;
     sleep(1);
     std::vector<Person> temp_person;
-    std::vector<PersonHistory> KCF_person;
     ImgService ser(1);
 
 
@@ -76,7 +75,9 @@ mutex KCF_MUT;
 
         PER_MUT.lock();
         PERSON = temp_person;
+        PER_IMG = src.get_cv_color();
         PERSON_USED = false;
+        QR_IMG_USED = false;
         PER_MUT.unlock();
         tracker.draw_person(src.get_cv_color(),temp_person);
         DrawPred(src.get_cv_color(),temp_person);
@@ -190,40 +191,116 @@ mutex KCF_MUT;
     ProService<int> tar_service(2);
     ProService<bool> run_service(3);
     int target = -1;
+    int sub_tar;
+    time_t time;
     bool is_run = true;
+
     tar_service.Public(&target);
     run_service.Public(&is_run);
     ProClient<int> tar_client(2);
     ProClient<bool> run_client(3);
+
+    int per_delay=0;
+
     while (true){
-        tar_client.Subscribe(target);
+        time_t ntime;
+        tar_client.Subscribe(sub_tar,ntime);
         run_client.Subscribe(is_run);
+
+        if(sub_tar != -1 && time != ntime){
+            target = sub_tar;
+            time=(long)ntime;
+        }else{
+            QR_MUT.lock();
+            if(QR_TAR!=-2){
+                target = QR_TAR;
+                QR_TAR=-2;
+            }
+            QR_MUT.unlock();
+        }
         motion.set_target(target);
-        if(!PERSON_USED){
+        tar_service.Public(&target, false);
+
+        if(per_delay%255 == 0){
             PER_MUT.lock();
-            motion.UpdatePerson(PERSON);
-            PERSON_USED = true;
+            if(!PERSON_USED){
+                motion.UpdatePerson(PERSON);
+                PERSON_USED = true;
+            }
             PER_MUT.unlock();
         }
         motion.Move(!is_run);
+
+        std::this_thread::sleep_for(std::chrono::microseconds(30));
+    }
+}
+
+[[noreturn]] void GestureThread(Ximg *img){
+    Mat src;
+    sleep(1);
+    std::vector<Person> temp_person;
+    ZQRCodeDetector QRDetector;
+    std::vector<QRCode> objs;
+
+    while(true){
+
+        PER_MUT.lock();
+        if(QR_IMG_USED){
+            PER_MUT.unlock();
+            usleep(1000);
+            continue;
+        }else{
+            temp_person=PERSON;
+            src = PER_IMG;
+            QR_IMG_USED = true;
+            PER_MUT.unlock();
+        }
+        QRDetector.Get(src,objs);
+        int id = -2;
+        for(auto &obj:objs){
+            if(obj.data=="1"){
+                int dis = src.cols;
+                for(auto &p:temp_person){
+                    if(obj.center.x > p.get_box().x &&
+                            obj.center.x < p.get_box().x +p.get_box().width &&
+                            obj.center.y > p.get_box().y &&
+                            obj.center.y < p.get_box().y +p.get_box().height &&
+                            (p.get_box().x +p.get_box().width/2-obj.center.x)<dis ){
+                        dis = (p.get_box().x +p.get_box().width/2-obj.center.x);
+                        id = p.get_id();
+                    }
+                }
+                break;
+            }
+        }
+        if(id != -2){
+            QR_MUT.lock();
+            QR_TAR=id;
+            QR_MUT.unlock();
+        }
+        std::this_thread::sleep_for(std::chrono::microseconds(300));
     }
 }
 
 int main(int argc, char * argv[])
 {
-    UVC cam(0);
-    //Realsense cam;
+//    UVC cam(0);
+    Realsense cam;
     Ximg img;
     CarController cctrl;
     thread t1(CameraThread, &cam, &img);
     thread t2(ProcessThread, &img);
 //    thread t3(KCFThread, &img);
     thread t4(ControlThread, &cctrl);
+    thread t5(GestureThread, &img);
+
 
     t1.join();
     t2.join();
 //    t3.join();
+    t5.join();
     t4.join();
+
 
 //    while(true){
 //        cam.GetImg(img);
