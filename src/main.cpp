@@ -108,82 +108,82 @@ mutex KCF_MUT;
 //}
 }
 
-[[noreturn]] void KCFThread(Ximg *img){
-    Ximg src;
-    sleep(1);
-    bool update = false;
-    cv::Mat sort_img;
-    KCFTracker tracker;
-    std::vector<Person> temp_person;
-    std::vector<Person*> track_person;
-    std::vector<PersonHistory> person_his;
-    ImgService ser(1);
+//[[noreturn]] void KCFThread(Ximg *img){
+    //Ximg src;
+    ////sleep(1);
+    //bool update = false;
+    //cv::Mat sort_img;
+    //KCFTracker tracker;
+    //std::vector<Person> temp_person;
+    //std::vector<Person*> track_person;
+    //std::vector<PersonHistory> person_his;
+    //ImgService ser(1);
 
 
-    while(true){
-        KCF_MUT.lock();
-        update = SORT_UPDATE;
-        if(SORT_UPDATE) {
-            temp_person = SORT_PERSON;
-            SORT_IMG.copyTo(sort_img);
-            SORT_UPDATE = false;
-        }
-        KCF_MUT.unlock();
-        if(update){
-            cout<<11111111<<endl;
-            person_his.clear();
-            track_person.clear();
-            for(auto &s:temp_person){
-                if(s.get_tracked()) track_person.push_back(&s);
-                person_his.emplace_back(s.get_id());
-            }
-        }else{
-            cout<<2222222<<endl;
-        }
+    //while(true){
+        //KCF_MUT.lock();
+        //update = SORT_UPDATE;
+        //if(SORT_UPDATE) {
+            //temp_person = SORT_PERSON;
+            //SORT_IMG.copyTo(sort_img);
+            //SORT_UPDATE = false;
+        //}
+        //KCF_MUT.unlock();
+        //if(update){
+            //cout<<11111111<<endl;
+            //person_his.clear();
+            //track_person.clear();
+            //for(auto &s:temp_person){
+                //if(s.get_tracked()) track_person.push_back(&s);
+                //person_his.emplace_back(s.get_id());
+            //}
+        //}else{
+            //cout<<2222222<<endl;
+        //}
 
-        if(track_person.empty()) {
-            continue;
-        }
-        if(update){
-            tracker.InitKCF(sort_img, track_person);
-        }
+        //if(track_person.empty()) {
+            //continue;
+        //}
+        //if(update){
+            //tracker.InitKCF(sort_img, track_person);
+        //}
 
-        CAM_MUT.lock();
-        if (KCF_IMG_USED) {
-            CAM_MUT.unlock();
-            continue;
-        }
-        src = *img;
-        KCF_IMG_USED = true;
-        CAM_MUT.unlock();
+        //CAM_MUT.lock();
+        //if (KCF_IMG_USED) {
+            //CAM_MUT.unlock();
+            //continue;
+        //}
+        //src = *img;
+        //KCF_IMG_USED = true;
+        //CAM_MUT.unlock();
 
-        tracker.Update(src, track_person);
-        int i = 0;
-        for(auto s: track_person){
-            if(s->get_kcf_tracked()){
-                person_his[i].located.push_back(s->get_located_xz());
-            }
-            i++;
-        }
-        KCF_MUT.lock();
-        PERSON_HIS = person_his;
-        KCF_MUT.unlock();
-        PER_MUT.lock();
-        PERSON = temp_person;
-        PERSON_USED = false;
-        PER_MUT.unlock();
+        //tracker.Update(src, track_person);
+        //int i = 0;
+        //for(auto s: track_person){
+            //if(s->get_kcf_tracked()){
+                //person_his[i].located.push_back(s->get_located_xz());
+            //}
+            //i++;
+        //}
+        //KCF_MUT.lock();
+        //PERSON_HIS = person_his;
+        //KCF_MUT.unlock();
+        //PER_MUT.lock();
+        //PERSON = temp_person;
+        //PERSON_USED = false;
+        //PER_MUT.unlock();
 
-        DrawPred(src.get_cv_color(),temp_person);
-        ser.Public(src.get_cv_color());
-//        imshow("DL",src.get_cv_color());
-        DrawPred(sort_img, temp_person);
+        //DrawPred(src.get_cv_color(),temp_person);
+        //ser.Public(src.get_cv_color());
+////        imshow("DL",src.get_cv_color());
+        //DrawPred(sort_img, temp_person);
 
-        imshow("111",sort_img);
-        waitKey(1);
-    }
+        //imshow("111",sort_img);
+        //waitKey(1);
+    //}
 
 
-}
+//}
 
 [[noreturn]] void ControlThread(CarController *cctrl){
     Motion3D motion(cctrl);
@@ -211,8 +211,8 @@ mutex KCF_MUT;
 
 int main(int argc, char * argv[])
 {
-//    UVC cam(0);
-    Realsense cam;
+    UVC cam(0);
+    //Realsense cam;
     Ximg img;
     CarController cctrl;
     thread t1(CameraThread, &cam, &img);

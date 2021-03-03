@@ -15,6 +15,7 @@
         padding: 10px;
       }
     </style>
+    <script type="text/javascript" src="static/js/jquery-3.6.0.min.js"></script>
     <script>
       function run_color(){
         if (document.querySelector('#run_status').value == 'Stop'){
@@ -32,7 +33,25 @@
 　　　　   return true; 
 　　    } 
       }
-      window.onload = run_color;
+
+      function RefreshStatus() {
+        $.ajax({
+          type: "GET",
+          url: "/status",
+          dataType: "html",   // 期待后端返回数据的类型
+          success: function (data) {//返回数据根据结果进行相应的处理
+            $("#status").html(data);
+          },
+          error: function () {
+            $("#status").html("<ul><li style='color:red'>load status failed!</li></ul>");
+          }
+        });
+      }
+      var t1 = window.setInterval(RefreshStatus,2000);
+      window.onload = function(){
+        RefreshStatus();
+        run_color();
+      }
     </script>
   </head>
   <body>
@@ -40,20 +59,16 @@
     <img src="{{ url_for('video_feed') }}"></br>
     <div id="container">
       <div>
-        <form method="post" onsubmit="return check_id()" accept-charset="utf-8">
+        <form action="/p_track_id" method="post" onsubmit="return check_id()" accept-charset="utf-8">
           Input the index of the person you want:</br>
-          <input type="text "name="index" value="{{ track_id }}", id="track_id">
+          <input type="text "name="index" id="track_id">
           <input type="submit" value="Submit" id="post_id">
         </form>
-        <form action="/run_status" method="post" accept-charset="utf-8">
+        <form action="/p_run_status" method="post" accept-charset="utf-8">
             <input type="submit" value="{{ bt_status }}" id="run_status">
         </form>
       </div>
-      <div>
-        <ul>
-            <li>Tracking ID: {{ track_id }}</li>
-        </ul>
-      </div>
+      <div id="status"></div>
     </div>
   </body>
 </html>

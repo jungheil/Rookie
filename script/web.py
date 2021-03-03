@@ -53,17 +53,9 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    global IS_RUN, TRACK_ID
-    if request.method == "GET":
-        return render_template('index.html' ,\
-                track_id=TRACK_ID, bt_status=("Stop" if IS_RUN else "Run"))
-    else:
-        text = request.form['index']
-        processed_text = text.upper()
-        TRACK_ID=int(processed_text)
-        lib.PTar_Public(TRACK_ID)
-        return render_template('index.html' , \
-                    track_id=TRACK_ID, bt_status=("Stop" if IS_RUN else "Run"))
+    global IS_RUN
+    return render_template('index.html' ,\
+            bt_status=("Stop" if IS_RUN else "Run"))
 
 def gen(camera):
     while True:
@@ -77,15 +69,28 @@ def gen(camera):
 def video_feed():
     return Response(gen(VideoCamera()),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+                    
+@app.route('/status')
+def status():
+    return render_template('status.html' ,\
+                track_id=TRACK_ID)
 
-@app.route('/run_status', methods=['POST'])
-def run_status():
+@app.route('/p_run_status', methods=['POST'])
+def p_run_status():
     global IS_RUN
     IS_RUN= not IS_RUN
     print(IS_RUN)
     lib.PRun_Public(IS_RUN)
     return redirect('/')
-
+    
+@app.route('/p_track_id', methods=['POST'])
+def p_track_id():
+    global TRACK_ID
+    text = request.form['index']
+    processed_text = text.upper()
+    TRACK_ID=int(processed_text)
+    lib.PTar_Public(TRACK_ID)
+    return redirect('/')
 
 
 if __name__ == '__main__':
