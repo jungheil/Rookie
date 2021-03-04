@@ -186,7 +186,7 @@ mutex QR_MUT;
 
 //}
 
-[[noreturn]] void ControlThread(CarController *cctrl){
+[[noreturn]] void ControlThread(CarController *cctrl, Ximg *img){
     Motion3D motion(cctrl);
     ProService<int> tar_service(2);
     ProService<bool> run_service(3);
@@ -229,13 +229,24 @@ mutex QR_MUT;
             }
             PER_MUT.unlock();
         }
+
+        int count = 0;
+        auto di = img->get_rs_depth();
+        for(int i = 0; i < di.get_width(); i++){
+            for(int j = 0; j < di.get_width(); j++){
+                float dis = di.get_distance(i,j);
+                if(dis<200&&dis>10) count++;
+            }
+        }
+        if(count > di.get_width()*di.get_height()/3) is_run = false;
+
         motion.Move(!is_run);
 
         std::this_thread::sleep_for(std::chrono::microseconds(30));
     }
 }
 
-[[noreturn]] void GestureThread(Ximg *img){
+[[noreturn]] void GestureThread(){
     Mat src;
     sleep(1);
     std::vector<Person> temp_person;
@@ -291,8 +302,8 @@ int main(int argc, char * argv[])
     thread t1(CameraThread, &cam, &img);
     thread t2(ProcessThread, &img);
 //    thread t3(KCFThread, &img);
-    thread t4(ControlThread, &cctrl);
-    thread t5(GestureThread, &img);
+    thread t4(ControlThread, &cctrl, &img);
+    thread t5(GestureThread);
 
 
     t1.join();

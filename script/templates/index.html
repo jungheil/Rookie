@@ -14,6 +14,12 @@
         margin: 10px;
         padding: 10px;
       }
+      img {
+        max-width: 100%;
+        height: auto;
+        width: auto;
+        width: auto; 
+      }
     </style>
     <script type="text/javascript" src="static/js/jquery-3.6.0.min.js"></script>
     <script>
@@ -32,6 +38,16 @@
 　　    }else{ 
 　　　　   return true; 
 　　    } 
+      }
+
+      ShowQR = function(){
+        if (document.getElementById("QRButton").innerHTML=="Hide"){
+          document.getElementById("QR").style.display="none";
+          document.getElementById("QRButton").innerHTML="Follow Me";
+        }else{
+          document.getElementById("QR").style.display="block";
+          document.getElementById("QRButton").innerHTML="Hide";
+        }
       }
 
       function RefreshStatus() {
@@ -67,8 +83,12 @@
         <form action="/p_run_status" method="post" accept-charset="utf-8">
             <input type="submit" value="{{ bt_status }}" id="run_status">
         </form>
+        <button id="QRButton" onclick="ShowQR()">Follow Me</button>
       </div>
       <div id="status"></div>
+    </div>
+    <div id="QR" style="display:none">
+      </br><img src="static/img/QR1.png">
     </div>
   </body>
 </html>

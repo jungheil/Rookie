@@ -96,6 +96,9 @@ def p_track_id():
     lib.PTar_Public(TRACK_ID)
     return redirect('/')
 
+@app.route('/favicon.ico')
+def favicon():
+    return app.send_static_file('img/favicon.ico')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=False, port=80, threaded = True)
