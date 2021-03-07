@@ -10,12 +10,21 @@ Realsense::Realsense() {
     rs2::config cfg;
     cfg.enable_stream(RS2_STREAM_DEPTH,1280,720,RS2_FORMAT_ANY,30);
     cfg.enable_stream(RS2_STREAM_COLOR,1280,720,RS2_FORMAT_BGR8,30);
+
     profile_=pipe_.start(cfg);
 
     rs2::frameset data = pipe_.wait_for_frames(); // Wait for next set of frames from the camera
     data = align_to_color_.process(data);
     rs2::depth_frame depth = data.get_depth_frame();
     intrinsics_ = rs2::video_stream_profile(depth.get_profile()).get_intrinsics();
+
+    auto sensor = profile_.get_device().query_sensors()[1];
+    sensor.set_option(RS2_OPTION_GAIN,0);
+    sensor.set_option(RS2_OPTION_GAMMA,500);
+    sensor.set_option(RS2_OPTION_SHARPNESS,65);
+
+    sensor.set_option(RS2_OPTION_ENABLE_AUTO_WHITE_BALANCE, true);
+    sensor.set_option(RS2_OPTION_ENABLE_AUTO_EXPOSURE, true);
 }
 bool Realsense::GetImg(Ximg &img) {
     rs2::frameset data = pipe_.wait_for_frames(); // Wait for next set of frames from the camera

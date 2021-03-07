@@ -17,13 +17,15 @@ using namespace cv;
 
 
 std::vector<Person> PERSON;
-cv::Mat PER_IMG;
+Ximg PER_IMG;
 bool SORT_UPDATE = false;
 std::vector<PersonHistory> PERSON_HIS;
 bool PERSON_USED = false;
 bool SORT_IMG_USED = true;
 bool QR_IMG_USED = true;
+bool STOP = false;
 int QR_TAR = -2;
+
 
 
 mutex CAM_MUT;
@@ -72,10 +74,9 @@ mutex QR_MUT;
         if(!temp_person.empty()){
             tracker.Update(temp_person);
         }
-
         PER_MUT.lock();
         PERSON = temp_person;
-        PER_IMG = src.get_cv_color();
+        PER_IMG = src;
         PERSON_USED = false;
         QR_IMG_USED = false;
         PER_MUT.unlock();
@@ -186,7 +187,7 @@ mutex QR_MUT;
 
 //}
 
-[[noreturn]] void ControlThread(CarController *cctrl, Ximg *img){
+[[noreturn]] void ControlThread(CarController *cctrl){
     Motion3D motion(cctrl);
     ProService<int> tar_service(2);
     ProService<bool> run_service(3);
@@ -221,24 +222,19 @@ mutex QR_MUT;
         motion.set_target(target);
         tar_service.Public(&target, false);
 
-        if(per_delay%255 == 0){
+//        if(per_delay%255 == 0){
             PER_MUT.lock();
             if(!PERSON_USED){
                 motion.UpdatePerson(PERSON);
                 PERSON_USED = true;
             }
             PER_MUT.unlock();
-        }
+//        }
 
-        int count = 0;
-        auto di = img->get_rs_depth();
-        for(int i = 0; i < di.get_width(); i++){
-            for(int j = 0; j < di.get_width(); j++){
-                float dis = di.get_distance(i,j);
-                if(dis<200&&dis>10) count++;
-            }
-        }
-        if(count > di.get_width()*di.get_height()/3) is_run = false;
+        QR_MUT.lock();
+        is_run = is_run & !STOP;
+        QR_MUT.unlock();
+
 
         motion.Move(!is_run);
 
@@ -247,7 +243,7 @@ mutex QR_MUT;
 }
 
 [[noreturn]] void GestureThread(){
-    Mat src;
+    Ximg src;
     sleep(1);
     std::vector<Person> temp_person;
     ZQRCodeDetector QRDetector;
@@ -266,11 +262,11 @@ mutex QR_MUT;
             QR_IMG_USED = true;
             PER_MUT.unlock();
         }
-        QRDetector.Get(src,objs);
+        QRDetector.Get(src.get_cv_color(),objs);
         int id = -2;
         for(auto &obj:objs){
             if(obj.data=="1"){
-                int dis = src.cols;
+                int dis = src.get_cv_color().cols;
                 for(auto &p:temp_person){
                     if(obj.center.x > p.get_box().x &&
                             obj.center.x < p.get_box().x +p.get_box().width &&
@@ -284,11 +280,30 @@ mutex QR_MUT;
                 break;
             }
         }
-        if(id != -2){
-            QR_MUT.lock();
-            QR_TAR=id;
-            QR_MUT.unlock();
+
+        auto di = src.get_rs_depth();
+
+        int count = 0;
+        for (int i = 0; i < di.get_width(); i++) {
+            for (int j = 0; j < di.get_height(); j++) {
+                float dis = di.get_distance(i, j);
+                if (dis < 200 && dis > 10) count++;
+            }
         }
+        bool stop;
+        if (count > di.get_width() * di.get_height() / 3) stop = true;
+        else stop = false;
+
+        QR_MUT.lock();
+        STOP = stop;
+        if(id != -2){
+            QR_TAR=id;
+        }
+        QR_MUT.unlock();
+
+
+
+
         std::this_thread::sleep_for(std::chrono::microseconds(300));
     }
 }
@@ -302,7 +317,7 @@ int main(int argc, char * argv[])
     thread t1(CameraThread, &cam, &img);
     thread t2(ProcessThread, &img);
 //    thread t3(KCFThread, &img);
-    thread t4(ControlThread, &cctrl, &img);
+    thread t4(ControlThread, &cctrl);
     thread t5(GestureThread);
 
 
