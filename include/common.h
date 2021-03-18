@@ -78,6 +78,7 @@ public:
     Person(float distance, cv::Point3f located, cv::Rect box):if_3d_(true),distance_(distance),located_(located),box_(box),width_(box.width){
         box_center_ = cv::Point2f(box_.x+0.5*box_.width,box_.y+0.5*box_.height);
         locater_x_z = cv::Point2f(located.x,located.z);
+        locater_x_y = cv::Point2f(box_.x+0.5*box_.width,box_.y+0.5*box_.height);
     };
     Person(cv::Rect box):box_(box),width_(box.width){
         box_center_ = cv::Point2f(box_.x+0.5*box_.width,box_.y+0.5*box_.height);
@@ -88,7 +89,7 @@ public:
     inline cv::Point2f get_box_center(){return box_center_;};
     inline int get_id(){return id_;};
     inline cv::Point2f get_located_xz(){return locater_x_z;};
-
+    inline cv::Point2f get_located_xy(){return locater_x_y;};
     inline void set_id(int id){id_=id;};
     inline bool if_track(){return if_track_;};
     inline bool if_3d(){return if_3d_;};
@@ -109,6 +110,7 @@ private:
     cv::Rect box_;
     cv::Point2f box_center_;
     cv::Point2f locater_x_z;
+    cv::Point2f locater_x_y;
     cv::Mat hog_mat;
     int width_;
     float distance_;
@@ -172,6 +174,7 @@ bool RectSafety(cv::Rect2d &brect, int cols, int rows);
 void normal_size(std::vector<std::vector<double>> &data );
 
 void data_fusion(std::vector<std::vector<double>> &cost,std::vector<std::vector<double>> &hs,std::vector<std::vector<double>> &hog);
+void Draw_map(std::vector<Person> &person);
 
 
 typedef struct

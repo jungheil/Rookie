@@ -78,16 +78,16 @@ void DrawPred(cv::Mat &src, std::vector<Person> person)
 
         ss<<"ID: "<<temp_id;
         std::string id_text = ss.str();
-        cv::Size id_size = cv::getTextSize(id_text, FONT_HERSHEY_PLAIN, 1, 2,&baseline);
+        cv::Size id_size = cv::getTextSize(id_text, FONT_HERSHEY_PLAIN, 3, 2,&baseline);
         rectangle(src,Rect(person[i].get_box().x+2,person[i].get_box().y+2,id_size.width+20,id_size.height+10),cv::Scalar(87,71,255),-1);
-        putText(src, id_text, cv::Point(person[i].get_box().x+12, person[i].get_box().y+id_size.height+7), cv::FONT_HERSHEY_PLAIN , 1, cv::Scalar(255,255,255),2);
+        putText(src, id_text, cv::Point(person[i].get_box().x+12, person[i].get_box().y+id_size.height+7), cv::FONT_HERSHEY_PLAIN , 3, cv::Scalar(255,255,255),2);
 
         ss.str("");
         ss<<setiosflags(ios::fixed)<<setprecision(2);
         ss<<"Located: ("<<person[i].get_located().x<<", "<<person[i].get_located().y<<", "<<person[i].get_located().z<<")";
         std::string located_text = ss.str();
         cv::Size located_size = cv::getTextSize(located_text, FONT_HERSHEY_PLAIN, 1, 2,&baseline);
-        rectangle(src,Rect(person[i].get_box().x+2,person[i].get_box().y+located_size.height+12,located_size.width+20,located_size.height+10),cv::Scalar(2, 165, 255),-1);
+        rectangle(src,Rect(person[i].get_box().x+2,person[i].get_box().y+id_size.height+located_size.height+2,located_size.width+20,located_size.height+10),cv::Scalar(2, 165, 255),-1);
         putText(src, located_text, cv::Point(person[i].get_box().x+12, person[i].get_box().y+id_size.height+located_size.height+17), cv::FONT_HERSHEY_PLAIN , 1, cv::Scalar(255,255,255),2);
     }
 }
@@ -96,6 +96,19 @@ bool RectSafety(cv::Rect &brect, int rows, int cols) {
     cv::Rect out_rect=cv::Rect(0,0,cols,rows);
     brect=brect&out_rect;
     return brect.width != 0 && brect.height != 0;
+}
+
+void Draw_map(std::vector<Person> &person){
+    cv::Mat map(400,400,CV_8UC1,Scalar(0));
+    for (int i = 0; i < person.size(); ++i) {
+        cout<<person[i].get_located_xz().x<<","<<person[i].get_located_xz().y<<"\n";
+        cv::circle(map, cv::Point(200+(person[i].get_located_xz().x/5)*200, 400-(person[i].get_located_xz().y/5)*400),3, cv::Scalar(159, 237, 123),-1);
+    }
+    line(map,Point2f(5,395),Point2f(395,395),Scalar(255),1);
+    line(map,Point2f(200,0),Point2f(200,400),Scalar(255),1);
+
+
+    imshow("2d",map);
 }
 
 cv::Mat To3Channels(const cv::Mat& binImg)

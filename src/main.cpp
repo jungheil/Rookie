@@ -11,7 +11,7 @@
 #include "Ctracker.h"
 #include "motion.h"
 #include "proshare.h"
-#include "KCFTracker.h"
+#include "NTracker.h"
 
 using namespace cv;
 
@@ -54,7 +54,9 @@ mutex QR_MUT;
 
 [[noreturn]] void ProcessThread(Ximg *img){
     XRDetector::Detector detector;
-    CTracker tracker(0.3, 0.5, 60.0, 10, 20);
+//    CTracker tracker(0.3, 0.5, 60.0, 10, 20);
+    namedWindow("2d",WINDOW_NORMAL);
+    Tracker_Set trackers(0.3,0.5,60,10,10);
     Ximg src;
     sleep(1);
     std::vector<Person> temp_person;
@@ -72,7 +74,8 @@ mutex QR_MUT;
         }
         detector.UpdatePerson(src, temp_person);
         if(!temp_person.empty()){
-            tracker.Update(temp_person);
+//            tracker.Update(temp_person);
+            trackers.Update(temp_person);
         }
         PER_MUT.lock();
         PERSON = temp_person;
@@ -80,7 +83,8 @@ mutex QR_MUT;
         PERSON_USED = false;
         QR_IMG_USED = false;
         PER_MUT.unlock();
-        tracker.draw_person(src.get_cv_color(),temp_person);
+//        tracker.draw_person(src.get_cv_color(),temp_person);
+//        trackers.draw_person(src.get_cv_color());
         DrawPred(src.get_cv_color(),temp_person);
         ser.Public(src.get_cv_color());
         imshow("DL",src.get_cv_color());

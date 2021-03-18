@@ -101,7 +101,7 @@ void Motion3D::Move(bool stop) {
 
         unsigned char v_linear = 128;
         unsigned char v_angular = 128;
-        float tar_distance = 1.5;
+        float tar_distance = 0.8;
         if(distance >= tar_distance){
             //if (abs(last_distance - distance) < 0.5){
             if (false){

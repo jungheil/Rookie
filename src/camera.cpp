@@ -19,9 +19,9 @@ Realsense::Realsense() {
     intrinsics_ = rs2::video_stream_profile(depth.get_profile()).get_intrinsics();
 
     auto sensor = profile_.get_device().query_sensors()[1];
-    sensor.set_option(RS2_OPTION_GAIN,0);
+    sensor.set_option(RS2_OPTION_GAIN,64);
     sensor.set_option(RS2_OPTION_GAMMA,500);
-    sensor.set_option(RS2_OPTION_SHARPNESS,65);
+    sensor.set_option(RS2_OPTION_SHARPNESS,55);
 
     sensor.set_option(RS2_OPTION_ENABLE_AUTO_WHITE_BALANCE, true);
     sensor.set_option(RS2_OPTION_ENABLE_AUTO_EXPOSURE, true);

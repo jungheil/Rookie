@@ -1,5 +1,5 @@
 #include "Ctracker.h"
-
+#include "KM.h"
 size_t CTrack::NextTrackID=0;
 Scalar Colors[] = { Scalar(255,0,0),
                     Scalar(0,0,255),
@@ -59,7 +59,7 @@ void CTracker::Update(std::vector<Person> &person)
         // If no tracks yet
         for(int i=0;i<person.size();i++)
         {
-            CTrack* tr=new CTrack(person[i].get_located_xz(),dt,Accel_noise_mag);
+            CTrack* tr=new CTrack(person[i].get_located_xy(),dt,Accel_noise_mag);
             tr->descriptors = person[i].descriptors;
             tr->hog.Init(person[i].get_mat());//更新hog
             tr->hs.Init(person[i].get_mat());//更新hs
@@ -82,7 +82,7 @@ void CTracker::Update(std::vector<Person> &person)
     {
         for(int j=0;j<person.size();j++)
         {
-            Point2d diff=(tracks[i]->prediction-person[j].get_located_xz());
+            Point2d diff=(tracks[i]->prediction-person[j].get_located_xy());
             //euclid distance
             dist=sqrtf(diff.x*diff.x+diff.y*diff.y);
             Cost[i][j]=dist;
@@ -90,72 +90,27 @@ void CTracker::Update(std::vector<Person> &person)
             HS[i][j]=tracks[i]->hs.GetSimilarity(person[j].get_mat());
         }
     }
-//    cout<<"HOG"<<"\n";
-//    for(const auto &s:HOG){
-//        for(const auto &i:s){
-//            cout<<i<<" ";
-//        }
-//        cout<<endl;
-//    }
-//    cout<<endl;
-//    cout<<"HS"<<"\n";
-//    for(const auto &s:HS){
-//        for(const auto &i:s){
-//            cout<<i<<" ";
-//        }
-//        cout<<endl;
-//    }
-//    cout<<"cost"<<"\n";
-//    for(const auto &s:Cost){
-//        for(const auto &i:s){
-//            cout<<i<<" ";
-//        }
-//        cout<<endl;
-//    }
     normal_size(HOG);
     normal_size(HS);
     normal_size(Cost);
-//    cout<<"HOG_normal"<<"\n";
-//    for(const auto &s:HOG){
-//        for(const auto &i:s){
-//            cout<<i<<" ";
-//        }
-//        cout<<endl;
-//    }
-//    cout<<"HS_normal"<<"\n";
-//    for(const auto &s:HS){
-//        for(const auto &i:s){
-//            cout<<i<<" ";
-//        }
-//        cout<<endl;
-//    }
-//    cout<<"cost_normal"<<"\n";
-//    for(const auto &s:Cost){
-//        for(const auto &i:s){
-//            cout<<i<<" ";
-//        }
-//        cout<<endl;
-//    }
-
-    data_fusion(Cost,HS,HOG);
-//    cout<<"data_fusion"<<"\n";
-//    for(const auto &s:Cost){
-//        for(const auto &i:s){
-//            cout<<i<<" ";
-//        }
-//        cout<<endl;
-//    }
-    // -----------------------------------
-    // Solving assignment problem (tracks and predictions of Kalman filter)
-    // -----------------------------------
-    //AssignmentProblemSolver APS;
-    //APS.Solve(Cost,assignment,AssignmentProblemSolver::optimal);
+//    data_fusion(Cost,HS,HOG);
+//    normal_size(Cost);
+    cout<<"data_fusion"<<"\n";
+    for(const auto &s:Cost){
+        for(const auto &i:s){
+            cout<<i<<" ";
+        }
+        cout<<endl;
+    }
     Hungarian APS;
     APS.Solve(Cost, assignment);
-    // -----------------------------------
-    // clean assignment from pairs with large distance
-    // -----------------------------------
-    // Not assigned tracks
+//    KM km;
+//    vector<int> test_ass(M);
+//    km.solve(Cost,test_ass);
+//    for (int i = 0; i < test_ass.size(); ++i) {
+//        cout<<i<<" "<<test_ass[i]<<"\n";
+//    }
+
     for(int i=0;i<assignment.size();i++)
     {
         if(assignment[i] >= 0 && assignment[i] < M)
@@ -209,7 +164,7 @@ void CTracker::Update(std::vector<Person> &person)
     {
         for(int i=0;i<not_assigned_detections.size();i++)
         {
-            CTrack* tr=new CTrack(person[not_assigned_detections[i]].get_located_xz(),dt,Accel_noise_mag);
+            CTrack* tr=new CTrack(person[not_assigned_detections[i]].get_located_xy(),dt,Accel_noise_mag);
             tr->descriptors = person[i].descriptors;
             tr->hog.Init(person[i].get_mat());//更新hog
             tr->hs.Init(person[i].get_mat());//更新hs
@@ -237,7 +192,7 @@ void CTracker::Update(std::vector<Person> &person)
             }
             tracks[i]->descriptors=person[assignment[i]].descriptors;
             tracks[i]->skipped_frames=0;
-            tracks[i]->prediction=tracks[i]->KF->Update(person[assignment[i]].get_located_xz(), 1);
+            tracks[i]->prediction=tracks[i]->KF->Update(person[assignment[i]].get_located_xy(), 1);
             person[assignment[i]].set_id(i);
             person[assignment[i]].set_tracked(true);
             tracks[i]->hog.Update(person[assignment[i]].get_mat());
