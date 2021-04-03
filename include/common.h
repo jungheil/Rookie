@@ -145,7 +145,7 @@ void DrawPred(cv::Mat &src, std::vector<Person> person);
 cv::Point3f Pixel2Point(Ximg img, cv::Point pixel);
 cv::Point3f Pixel2Point(Ximg img, cv::Point pixel, float distance);
 
-bool RectSafety(cv::Rect &brect, int rows, int cols) ;
+bool RectSafety(cv::Rect &brect, int cols, int rows) ;
 
 cv::Mat To3Channels(const cv::Mat& binImg);
 
