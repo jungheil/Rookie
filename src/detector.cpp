@@ -212,32 +212,35 @@ namespace XRDetector{
         std::vector<cv::Rect> boxes;
         ml.Predictor(boxes, img.get_cv_color());
         for (size_t i = 0; i<boxes.size(); i++){
-            RectSafety(boxes[i],img.get_cv_color().rows,img.get_cv_color().cols);
+            RectSafety(boxes[i],img.get_cv_color().cols,img.get_cv_color().rows);
             cv::Point3f point;
             if (img.cam_->GetCamType() == Camera::CAMERA_TYPE_REALSENSE){
                 Mat mask;
-                GetMask(img,boxes[i],mask);
-                float distance=0;
-                float dists[16];
-                for (int j = 0; j<4;j++){
-                    for(int k=0; k<4;k++){
-                        if (mask.at<uchar>(mask.rows/5*(1+k),mask.cols/5*(1+j))==255){
-                            dists[j*4+k]=img.get_rs_depth().get_distance(mask.cols/5*(1+j)+boxes[i].x,mask.rows/5*(1+k)+boxes[i].y);
-                        }else{
-                            dists[j*4+k]=0;
-                        }
-                    }
-                }
-                int count=0;
-                float sum=0;
-                for (int j=0; j<16;j++){
-                    if (dists[j] !=0){
-                        sum+=dists[j];
-                        count++;
-                    }
-                }
-                distance=sum/count;
-                if(!isnormal(distance) || distance < 0.1 || distance > 8) continue;
+                float distance;
+                GetMask(img,boxes[i],mask,distance);
+//                if (mask.empty()) continue;
+//                float distance=0;
+//                float dists[16];
+//                for (int j = 0; j<4;j++){
+//                    for(int k=0; k<4;k++){
+//                        if (mask.at<uchar>(mask.rows/5*(1+k),mask.cols/5*(1+j))==255){
+//                            dists[j*4+k]=img.get_rs_depth().get_distance(mask.cols/5*(1+j)+boxes[i].x,mask.rows/5*(1+k)+boxes[i].y);
+//                        }else{
+//                            dists[j*4+k]=0;
+//                        }
+//                    }
+//                }
+//                int count=0;
+//                float sum=0;
+//                for (int j=0; j<16;j++){
+//                    if (dists[j] > 0.1 && dists[j] < 12){
+//                        sum+=dists[j];
+//                        count++;
+//                    }
+//                }
+//                distance=sum/count;
+
+                if(!isnormal(distance) || distance < 0.1 || distance >8) continue;
 //                cout<<"dist:"<<distance<<endl;
                 Point pixel = Point(boxes[i].x+0.5*boxes[i].width,boxes[i].y+0.5*boxes[i].height);
                 point = Pixel2Point(img, pixel,distance);
@@ -287,7 +290,7 @@ namespace XRDetector{
         std::vector<cv::Rect>().swap(boxes);
     }
 
-    void Detector::GetMask(Ximg img, Rect box, Mat& out) {
+    void Detector::GetMask(Ximg img, Rect &box, Mat& out, float &out_dis) {
 //        rs2::colorizer color_map_(2);
 //        cv::Mat img_d(cv::Size(img.get_rs_depth().get_width(), img.get_rs_depth().get_height()),
 //                CV_8UC3, (void*)img.get_rs_depth().apply_filter(color_map_).get_data(), cv::Mat::AUTO_STEP);
@@ -298,65 +301,119 @@ namespace XRDetector{
 //        imshow("1112",gray);
 //        waitKey(0);
 
-
-        float **distance = new float*[box.height];
-        float max_dist=0.5;
-        float min_dist=6;
+        Mat dis(Size(box.width, box.height), CV_32FC1);
         for(int i=0; i<box.height; i++){
-            distance[i] = new float[box.width];
             for(int j=0; j<box.width; j++){
-                distance[i][j] = img.get_rs_depth().
+                float dis_t = img.get_rs_depth().
                         get_distance(box.x+j,box.y+i);
-//                if (distance[i][j]<min_dist) min_dist=distance[i][j];
-//                if (distance[i][j]>max_dist) max_dist=distance[i][j];
+                if (dis_t > 8 || dis_t < 0.1) dis_t =0;
+                dis.at<float>(i,j) = dis_t;
             }
         }
 
-        float breadth = max_dist-min_dist;
-        Mat roi(box.height,box.width,CV_8UC1);
-        for(int i=0;i<box.height;i++){
-            for(int j=0; j<box.width;j++){
-                float size=distance[i][j]-min_dist;
-                size = size < 0 ? 0 : size;
-                size = size > 255 ? 255 : size;
-                roi.ptr<uchar>(i)[j]=(distance[i][j]-min_dist)/breadth*255;
+
+        Mat element10 = getStructuringElement(MORPH_RECT, Size(10, 10));
+        Mat element25 = getStructuringElement(MORPH_RECT, Size(25, 25));
+
+        erode(dis, dis, element25);
+        dilate(dis, dis, element25);
+
+
+        Mat dst;
+        Rect dst_box;
+        float distance;
+        int reliable=10;
+        for(int i=0;i<3;i++){
+            Mat fill = To3Channels(dis);
+            Rect ccomp;
+            floodFill(fill,Point(dis.cols/2,dis.rows*(1+i)/4),Scalar(255,0,0),&ccomp, Scalar(0.15, 0.15, 0.15),Scalar(0.15, 0.15, 0.15));
+            inRange(fill,Scalar(255,0,0),Scalar(255,0,0),fill);
+            int pixel_sum = sum(fill/255)[0];
+            if(pixel_sum>reliable){
+                vector<Mat> channels;
+                split(fill,channels);
+                Mat dis_t;
+                dis.copyTo(dis_t,channels[0]);
+                dis_t = dis_t(ccomp);
+
+                if(float(countNonZero(dis_t))/(dis_t.cols*dis_t.rows) < 0.4) continue;
+                dst = channels[0](ccomp);
+                erode(dst, dst, element10);
+                distance = mean(dis(ccomp), dst)[0];
+                dst_box.x = ccomp.x+box.x;
+                dst_box.y = ccomp.x+box.y;
+                dst_box.width = ccomp.width;
+                dst_box.height = ccomp.height;
+                RectSafety(dst_box,img.get_cv_color().cols, img.get_cv_color().rows);
             }
         }
+
+        if(!dst.empty()){
+            dst.copyTo(out);
+            box = dst_box;
+            out_dis=distance;
+        }
+
+
+
+//        float **distance = new float*[box.height];
+//        float max_dist=0.5;
+//        float min_dist=6;
+//        for(int i=0; i<box.height; i++){
+//            distance[i] = new float[box.width];
+//            for(int j=0; j<box.width; j++){
+//                distance[i][j] = img.get_rs_depth().
+//                        get_distance(box.x+j,box.y+i);
+////                if (distance[i][j]<min_dist) min_dist=distance[i][j];
+////                if (distance[i][j]>max_dist) max_dist=distance[i][j];
+//            }
+//        }
+//
+//        float breadth = max_dist-min_dist;
+//        Mat roi(box.height,box.width,CV_8UC1);
+//        for(int i=0;i<box.height;i++){
+//            for(int j=0; j<box.width;j++){
+//                float size=distance[i][j]-min_dist;
+//                size = size < 0 ? 0 : size;
+//                size = size > 255 ? 255 : size;
+//                roi.ptr<uchar>(i)[j]=(distance[i][j]-min_dist)/breadth*255;
+//            }
+//        }
 //        Mat gray;
 //        cvtColor(img.get_cv_color(),gray,COLOR_BGR2GRAY);
 //        gray=gray(person.box_);
 //        Canny(gray,gray,50,100*2);
 //        Canny(roi,roi,50,100*2);
-        Mat element10 = getStructuringElement(MORPH_RECT, Size(25, 25));
-        Mat element25 = getStructuringElement(MORPH_RECT, Size(25, 25));
-
-//        dilate(gray, gray, element);
-//        dilate(roi, roi, element);
-//        erode(roi, roi, element);
-//        threshold(roi,roi,0,255,THRESH_BINARY|THRESH_OTSU);
-        erode(roi, roi, element10);
-        dilate(roi, roi, element25);
-        Mat dst;
-        int reliable=0;
-        for(int i=0;i<3;i++){
-            Mat fill = To3Channels(roi);
-            Rect ccomp;
-            floodFill(fill,Point(roi.cols/2,roi.rows*(1+i)/4),Scalar(255,0,0),&ccomp, Scalar(1, 1, 1),Scalar(1, 1, 1));
-            inRange(fill,Scalar(255,0,0),Scalar(255,0,0),fill);
-            int pixel_sum = sum(fill)[0];
-            if(pixel_sum>reliable){
-                dst = fill;
-                reliable = pixel_sum;
-            }
-        }
-        erode(dst, dst, element25);
-        vector<Mat> channels;
-        split(dst,channels);
-        channels[0].copyTo(out);
-        for(int i=0; i<box.height; i++){
-            delete [] distance[i];
-        }
-        delete[] distance;
+//        Mat element10 = getStructuringElement(MORPH_RECT, Size(25, 25));
+//        Mat element25 = getStructuringElement(MORPH_RECT, Size(25, 25));
+//
+////        dilate(gray, gray, element);
+////        dilate(roi, roi, element);
+////        erode(roi, roi, element);
+////        threshold(roi,roi,0,255,THRESH_BINARY|THRESH_OTSU);
+//        erode(roi, roi, element10);
+//        dilate(roi, roi, element25);
+//        Mat dst;
+//        int reliable=0;
+//        for(int i=0;i<3;i++){
+//            Mat fill = To3Channels(roi);
+//            Rect ccomp;
+//            floodFill(fill,Point(roi.cols/2,roi.rows*(1+i)/4),Scalar(255,0,0),&ccomp, Scalar(1, 1, 1),Scalar(1, 1, 1));
+//            inRange(fill,Scalar(255,0,0),Scalar(255,0,0),fill);
+//            int pixel_sum = sum(fill)[0];
+//            if(pixel_sum>reliable){
+//                dst = fill;
+//                reliable = pixel_sum;
+//            }
+//        }
+//        erode(dst, dst, element25);
+//        vector<Mat> channels;
+//        split(dst,channels);
+//        channels[0].copyTo(out);
+//        for(int i=0; i<box.height; i++){
+//            delete [] distance[i];
+//        }
+//        delete[] distance;
 
     }
 }

@@ -61,7 +61,7 @@ namespace XRDetector{
     public:
         Detector();
         void UpdatePerson(Ximg img, std::vector<Person> &person);
-        void GetMask(Ximg img, cv::Rect box, cv::Mat& out);
+        void GetMask(Ximg img, cv::Rect &box, cv::Mat& out, float &out_dis);
 
     private:
         MLTorch ml;

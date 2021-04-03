@@ -92,7 +92,7 @@ void DrawPred(cv::Mat &src, std::vector<Person> person)
     }
 }
 
-bool RectSafety(cv::Rect &brect, int rows, int cols) {
+bool RectSafety(cv::Rect &brect, int cols, int rows) {
     cv::Rect out_rect=cv::Rect(0,0,cols,rows);
     brect=brect&out_rect;
     return brect.width != 0 && brect.height != 0;
