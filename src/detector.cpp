@@ -313,7 +313,7 @@ namespace XRDetector{
 
 
         Mat element10 = getStructuringElement(MORPH_RECT, Size(10, 10));
-        Mat element25 = getStructuringElement(MORPH_RECT, Size(25, 25));
+        Mat element25 = getStructuringElement(MORPH_RECT, Size(20, 20));
 
         erode(dis, dis, element25);
         dilate(dis, dis, element25);
@@ -322,11 +322,11 @@ namespace XRDetector{
         Mat dst;
         Rect dst_box;
         float distance;
-        int reliable=10;
+        int reliable=5;
         for(int i=0;i<3;i++){
             Mat fill = To3Channels(dis);
             Rect ccomp;
-            floodFill(fill,Point(dis.cols/2,dis.rows*(1+i)/4),Scalar(255,0,0),&ccomp, Scalar(0.15, 0.15, 0.15),Scalar(0.15, 0.15, 0.15));
+            floodFill(fill,Point(dis.cols/2,dis.rows*(1+i)/4),Scalar(255,0,0),&ccomp, Scalar(0.2, 0.2, 0.2),Scalar(0.2, 0.2, 0.2));
             inRange(fill,Scalar(255,0,0),Scalar(255,0,0),fill);
             int pixel_sum = sum(fill/255)[0];
             if(pixel_sum>reliable){
@@ -336,7 +336,7 @@ namespace XRDetector{
                 dis.copyTo(dis_t,channels[0]);
                 dis_t = dis_t(ccomp);
 
-                if(float(countNonZero(dis_t))/(dis_t.cols*dis_t.rows) < 0.4) continue;
+                if(float(countNonZero(dis_t))/(dis_t.cols*dis_t.rows) < 0.3) continue;
                 dst = channels[0](ccomp);
                 erode(dst, dst, element10);
                 distance = mean(dis(ccomp), dst)[0];
@@ -350,7 +350,7 @@ namespace XRDetector{
 
         if(!dst.empty()){
             dst.copyTo(out);
-            box = dst_box;
+//            box = dst_box;
             out_dis=distance;
         }
 

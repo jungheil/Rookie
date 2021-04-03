@@ -76,7 +76,7 @@ private:
 private:
     std::vector<cv::Mat> hists_;
     cv::Size img_size_ = cv::Size(16,32);
-    float learning_rate = 0.25;
+    float learning_rate = 0.15;
     std::vector<double> filter_a_;
     std::vector<double> filter_b_;
 };
@@ -102,7 +102,7 @@ private:
     std::vector<double> fa_;
     std::vector<double> fb_;
 
-    double learning_rate = 0.25;
+    double learning_rate = 0.15;
     cv::Size img_size_ = cv::Size(128,256);
 };
 
