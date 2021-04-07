@@ -197,20 +197,20 @@ namespace XRDetector{
         return output;
     }
 
-    Detector::Detector() {
+    Detector::Detector()
+    {
         R_b_cam = Mat::eye(3,3,CV_32FC1);
         R_b_cam.at<float>(0,0) =cos(10/180*3.1415926);
         R_b_cam.at<float>(0,1) =-sin(10/180*3.1415926);
         R_b_cam.at<float>(1,0) =sin(10/180*3.1415926);
         R_b_cam.at<float>(1,1) =cos(10/180*3.1415926);
-
-
     }
 
     void Detector::UpdatePerson(Ximg img, std::vector<Person> &person){
         person.clear();
         std::vector<cv::Rect> boxes;
         ml.Predictor(boxes, img.get_cv_color());
+        cout << boxes;
         for (size_t i = 0; i<boxes.size(); i++){
             RectSafety(boxes[i],img.get_cv_color().cols,img.get_cv_color().rows);
             cv::Point3f point;

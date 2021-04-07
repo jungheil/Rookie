@@ -39,6 +39,7 @@ public:
     Usart();//串口初始化
 
     int UsartSend(unsigned char* data);
+    int UsartSend(uint16_t * data);
     /**
     * @brief    串口接收数据
     *            要求启动后，在pc端发送ascii文件

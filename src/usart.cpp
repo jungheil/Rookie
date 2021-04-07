@@ -156,6 +156,36 @@ int Usart::UsartSend(unsigned char* data)
     return len;
 }
 
+int Usart::UsartSend(uint16_t* data)
+{
+    int len = 0;
+    unsigned char buff[30]={};
+    buff[0]=0x00;
+    buff[1]=(data[0]&0xFF00)>>8;
+    buff[2]=data[0]&0x00FF;
+    buff[3]=(data[1]&0xFF00)>>8;
+    buff[4]=data[1]&0x00FF;
+    //TODO:Pheyeon-change the type of 'buff' and 'data' to char*   (finished)
+    AppendCRC16CheckSum(buff,kTotalSendLength);
+    len = write(Usart::serial_fd_, buff,kTotalSendLength );//实际写入的长度
+//    cout<<(int)data[0]<<","<<(int)data[1]<<endl;
+//    cout<<"l:"<<len<<"  buff:"<<((buff[1]<<8)|buff[2]) <<" "<<((buff[3]<<8)|buff[4])<<endl;
+#ifdef USART_DEBUG
+    if(len == kTotalSendLength)
+    {
+
+        printf("send finished total_send is %d\n",kTotalSendLength);
+
+    }
+    else
+    {
+        tcflush(Usart::serial_fd_, TCOFLUSH);//TCOFLUSH刷新写入的数据但不传送
+        return -1;
+    }
+#endif
+    return len;
+}
+
 int  Usart::UsartRecv(volatile int *data)
 {
     int yaw;short Pitch;int mode;int firemode;

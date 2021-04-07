@@ -18,8 +18,9 @@ public:
         CARCONTROL_ANGULAR_LEFT     =   1,
         CARCONTROL_ANGULAR_RIGHT    =   2
     };
-    bool Move(CARCONTROL_LINEAR,unsigned char linear_velocity, CARCONTROL_ANGULAR,unsigned char angular_velocity);
-    bool Move(unsigned char data1, unsigned char data2);
+//    bool Move(CARCONTROL_LINEAR,unsigned char linear_velocity, CARCONTROL_ANGULAR,unsigned char angular_velocity);
+//    bool Move(unsigned char data1, unsigned char data2);//TODO:Pheyeon-delete the function
+    bool Move(uint16_t distance,uint16_t angle);
     void SetEnable(bool enable);
 private:
     Usart usart;
