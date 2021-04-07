@@ -240,7 +240,7 @@ mutex QR_MUT;
         QR_MUT.unlock();
 
 
-        motion.Move(!is_run);//TODO: Pheyeon-send distance and angle(-1 means stop)
+        motion.Move(!is_run);
 
         std::this_thread::sleep_for(std::chrono::microseconds(30));
     }
