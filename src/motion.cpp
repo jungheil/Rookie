@@ -44,11 +44,20 @@
 //    return len != -1;
 //}
 
-bool CarController::Move(uint16_t distance,uint16_t angle=0){
-    //    cout<<endl<<"angle:" << (float)angle/100-90 << endl<<"distance: "<<(float)distance/100<<endl;
+bool CarController::Move(uint16_t distance,uint16_t angle=9000){
+    //cout<<endl<<"angle:" << (float)angle/100-90 << endl<<"distance: "<<(float)distance/100<<endl;
     //TODO:Pheyeon-Add binary shift     (finished)
     uint16_t data[2] = {distance, angle};
-    int len = usart.UsartSend(data);
+    unsigned char buff[30]={};
+    buff[0]=0x01;
+    buff[1]=(data[0]&0xFF00)>>8;
+    buff[2]=data[0]&0x00FF;
+    buff[3]=(data[1]&0xFF00)>>8;
+    buff[4]=data[1]&0x00FF;
+    buff[5]=0x00FF;
+    int len=0;
+    for(uint8_t loop_num=0;loop_num<6;loop_num++)len = usart.UsartSend(&buff[loop_num]);
+//    int len = usart.UsartSend(data);
     usleep(500);
     return len != -1;
 }

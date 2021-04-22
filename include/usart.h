@@ -28,7 +28,7 @@
 
 //设备名称
 const char kDevice[] = "/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0";
-const int  kTotalSendLength = 6;
+const int  kTotalSendLength = 1;
 const int  kReceiveLength = 11;
 using namespace std;
 
