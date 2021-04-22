@@ -28,7 +28,7 @@
 
 //设备名称
 const char kDevice[] = "/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0";
-const int  kTotalSendLength = 5;
+const int  kTotalSendLength = 1;
 const int  kReceiveLength = 11;
 using namespace std;
 
@@ -39,6 +39,7 @@ public:
     Usart();//串口初始化
 
     int UsartSend(unsigned char* data);
+    int UsartSend(uint16_t * data);
     /**
     * @brief    串口接收数据
     *            要求启动后，在pc端发送ascii文件
