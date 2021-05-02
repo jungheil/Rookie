@@ -24,11 +24,19 @@ class Camera;
 
 class Ximg{
 public:
-    Ximg(Camera *cam,cv::Mat color, rs2::frame depth,rs2_intrinsics intrinsics, uint64_t seq=0):
+//    Ximg(Camera *cam,cv::Mat color, rs2::frame depth,rs2_intrinsics intrinsics, uint64_t seq=0):
+//            cam_(cam),
+//            cv_color_(std::move(color)),
+//            rs_depth_(std::move(depth)),
+//            rs_intrinsics_(intrinsics),
+//            header_(seq),
+//            is_used_(false){};
+    Ximg(Camera *cam,cv::Mat color, rs2::frame depth,rs2_intrinsics intrinsics,float pitch, uint64_t seq=0):
             cam_(cam),
             cv_color_(std::move(color)),
             rs_depth_(std::move(depth)),
             rs_intrinsics_(intrinsics),
+            pitch_(pitch),
             header_(seq),
             is_used_(false){};
     Ximg(Camera *cam,cv::Mat color, cv::Mat depth, uint64_t seq=0):
@@ -48,6 +56,7 @@ public:
     Ximg& operator=(const Ximg &ximg);
     inline cv::Mat& get_cv_color() {is_used_=true; return cv_color_;};
     inline rs2::depth_frame& get_rs_depth() {is_used_=true; return rs_depth_;};
+    inline float get_pitch(){return pitch_;};
 public:
     Camera *cam_ = nullptr;
     rs2_intrinsics rs_intrinsics_;
@@ -57,6 +66,7 @@ private:
     cv::Mat cv_color_;
     cv::Mat cv_depth_;
     rs2::depth_frame rs_depth_= rs2::depth_frame(rs2::frame());
+    float pitch_ = 10;
 };
 
 class Camera {

@@ -5,9 +5,11 @@
 #ifndef XIROBO_DETECTOR_H
 #define XIROBO_DETECTOR_H
 #include <opencv2/opencv.hpp>
+//#include <vector>
 #include "torch/script.h"
 
 #include "common.h"
+#include "ImgSocket.h"
 
 namespace XRDetector{
     class ML{
@@ -57,15 +59,31 @@ namespace XRDetector{
         torch::jit::script::Module module_;
     };
 
+    class MLSocket:ML{
+    public:
+        MLSocket();
+        void Predictor(std::vector<cv::Rect> &boxes, cv::Mat src) override;
+
+    private:
+        std::vector<cv::Rect> SocketTransport(std::string temp_str) ;
+    private:
+        socket_comm::Client client_;
+
+    };
+
     class Detector {
     public:
-        Detector();
+        Detector() = default;
         void UpdatePerson(Ximg img, std::vector<Person> &person);
         void GetMask(Ximg img, cv::Rect &box, cv::Mat& out, float &out_dis);
 
     private:
-        MLTorch ml;
+        void UpdateRotation(float angle);
+
+    private:
+//        MLTorch ml;
 //        MLCV ml;
+        MLSocket ml;
         cv::Mat R_b_cam;  //相机坐标系在基坐标系下表达
     };
 }

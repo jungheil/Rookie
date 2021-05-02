@@ -9,3 +9,4 @@ build
 bin
 lib
 venv
+__pycache__

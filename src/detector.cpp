@@ -6,6 +6,9 @@
 #include "detector.h"
 #include <math.h>
 
+#include <regex>
+
+
 
 using namespace cv;
 using namespace dnn;
@@ -197,14 +200,6 @@ namespace XRDetector{
         return output;
     }
 
-    Detector::Detector()
-    {
-        R_b_cam = Mat::eye(3,3,CV_32FC1);
-        R_b_cam.at<float>(0,0) =cos(10/180*3.1415926);
-        R_b_cam.at<float>(0,1) =-sin(10/180*3.1415926);
-        R_b_cam.at<float>(1,0) =sin(10/180*3.1415926);
-        R_b_cam.at<float>(1,1) =cos(10/180*3.1415926);
-    }
 
     void Detector::UpdatePerson(Ximg img, std::vector<Person> &person){
         person.clear();
@@ -244,6 +239,7 @@ namespace XRDetector{
 //                cout<<"dist:"<<distance<<endl;
                 Point pixel = Point(boxes[i].x+0.5*boxes[i].width,boxes[i].y+0.5*boxes[i].height);
                 point = Pixel2Point(img, pixel,distance);
+                UpdateRotation(img.get_pitch());
                 Mat vec = R_b_cam*cv::Vec3f(point.x,point.y,point.z);
 
                 point = Point3f(vec.at<float>(0,0),vec.at<float>(0,1),vec.at<float>(0,2));
@@ -415,6 +411,70 @@ namespace XRDetector{
 //        }
 //        delete[] distance;
 
+    }
+
+    void Detector::UpdateRotation(float angle) {
+        R_b_cam = Mat::eye(3,3,CV_32FC1);
+        R_b_cam.at<float>(0,0) =cos(angle/180*3.1415926);
+        R_b_cam.at<float>(0,1) =-sin(angle/180*3.1415926);
+        R_b_cam.at<float>(1,0) =sin(angle/180*3.1415926);
+        R_b_cam.at<float>(1,1) =cos(angle/180*3.1415926);
+    }
+
+    MLSocket::MLSocket() {
+        client_.init();
+    }
+
+    void MLSocket::Predictor(vector<cv::Rect> &boxes, cv::Mat src) {
+//        Size size = src.size();
+//        resize(src,src,Size(416,src.rows/src.cols*416));
+        client_.send_image(src);
+
+        string str = client_.receive();
+//        cout<<str<<endl;
+        boxes =  SocketTransport(str);
+    }
+
+    vector<cv::Rect> MLSocket::SocketTransport(std::string temp_str)
+    {
+//    std::string strng("1,12,3,4,5,6,2,3,4,5,");
+        std::string strng = temp_str;
+
+        std::regex re(",");
+        std::sregex_token_iterator p(strng.begin(), strng.end(), re, -1);
+        std::sregex_token_iterator end;
+        std::vector<int> vec;
+        std::vector<Rect> out;
+        if(strng.size() <4){
+            return out;
+        }
+        while (p != end)
+        {
+            istringstream is(*p);
+            ++p;
+            int temp;
+            is >> temp;
+            vec.push_back(temp);
+        }
+        for(int i =0;i<vec.size();i++)
+        {
+//            int x = vec[i++]/416*size.width;
+//            int y = vec[i++]/416*size.height;
+//            int w = vec[i++]/416*size.width;
+//            int h = vec[i]/416*size.height;
+            int x = vec[i++];
+            int y = vec[i++];
+            int w = vec[i++];
+            int h = vec[i];
+            out.emplace_back(x,y,w,h);
+
+        }
+//        for(auto i : vec)
+//        {
+//            std::cout << i << "\t";
+//        }
+//    std::copy(vec.begin(),vec.end(),std::ostream_iterator<std::string>(std::cout," "));
+        return out ;
     }
 }
 

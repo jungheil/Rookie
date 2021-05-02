@@ -44,7 +44,7 @@ public:
     Tracker_Set(float _dt,
                 float _Accel_noise_mag,
                 double _dist_thres=60,
-                int _maximum_allowed_skipped_frames=10,
+                int _maximum_allowed_skipped_frames=50,
                 int _max_trace_length=10);
     ~Tracker_Set();
     void Draw_map_by_track(int num);

@@ -16,6 +16,7 @@ Ximg& Ximg::operator=(Ximg &ximg){
     cv_color_ = ximg.cv_color_.clone();
     cv_depth_ = ximg.cv_depth_.clone();
     rs_depth_ = ximg.rs_depth_;
+    pitch_ = ximg.pitch_;
     ximg.is_used_ = true;
     return *this;
 }
@@ -28,6 +29,7 @@ Ximg& Ximg::operator=(const Ximg &ximg){
     cv_color_ = ximg.cv_color_.clone();
     cv_depth_ = ximg.cv_depth_.clone();
     rs_depth_ = ximg.rs_depth_;
+    pitch_ = ximg.pitch_;
     return *this;
 }
 
